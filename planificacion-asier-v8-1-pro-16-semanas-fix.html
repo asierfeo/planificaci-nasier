@@ -1,0 +1,2802 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Planificación Asier</title>
+  <style>
+    :root {
+      --bg: #070707;
+      --card: rgba(28, 28, 28, 0.92);
+      --ink: #f5f1e8;
+      --muted: #aaa39a;
+      --line: rgba(245, 241, 232, 0.12);
+      --silver: #c8c8c8;
+      --beige: #d8c3a5;
+      --copper: #b87333;
+      --burgundy: #7f1d1d;
+      --green: #6ea56e;
+      --yellow: #c6a15b;
+      --red: #a64242;
+      --shadow: 0 24px 70px rgba(0,0,0,.45);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Montserrat, Inter, Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at 12% 5%, rgba(184,115,51,.22), transparent 28%),
+        radial-gradient(circle at 92% 0%, rgba(216,195,165,.10), transparent 25%),
+        linear-gradient(180deg, #050505 0%, #0c0c0c 42%, #111 100%);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    .app { max-width: 1440px; margin: 0 auto; padding: 22px 14px 56px; }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 28px;
+      border-radius: 32px;
+      background:
+        linear-gradient(135deg, rgba(245,241,232,.10), transparent 32%),
+        linear-gradient(135deg, #181818 0%, #090909 52%, #1b130e 100%);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(216,195,165,.28);
+      background: rgba(216,195,165,.08);
+      color: var(--beige);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      margin-bottom: 14px;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(32px, 5vw, 62px);
+      line-height: .95;
+      letter-spacing: -2.2px;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 860px;
+      color: rgba(245,241,232,.72);
+      line-height: 1.65;
+      font-size: 15px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.045);
+      border-radius: 20px;
+      padding: 15px;
+      backdrop-filter: blur(8px);
+    }
+
+    .stat span {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      font-weight: 800;
+    }
+
+    .stat strong { font-size: 19px; }
+
+    .controls-wrap {
+      position: relative;
+      margin: 22px 0;
+    }
+
+    .more-menu {
+      display: none;
+      position: absolute;
+      z-index: 20;
+      top: calc(100% + 10px);
+      right: 0;
+      width: min(360px, 100%);
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: rgba(16,16,16,.96);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .more-menu.open { display: grid; gap: 10px; }
+
+    .more-menu button {
+      width: 100%;
+      text-align: left;
+      justify-content: flex-start;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: rgba(20,20,20,.68);
+      backdrop-filter: blur(10px);
+    }
+
+    select, button, input, textarea { font-family: inherit; }
+
+    select, button {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 12px 15px;
+      background: #161616;
+      color: var(--ink);
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, var(--copper), #6d4a2f);
+      border-color: rgba(184,115,51,.5);
+      color: #fffaf2;
+    }
+
+    button.secondary { color: var(--beige); }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel, .side-card {
+      border: 1px solid var(--line);
+      background: rgba(16,16,16,.72);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      background: rgba(255,255,255,.03);
+    }
+
+    .panel-head h2 { margin: 0; font-size: 20px; letter-spacing: -.4px; }
+    .panel-head small { color: var(--muted); font-weight: 800; }
+
+    .calendar { padding: 16px; }
+
+    .weekdays, .month-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+    }
+
+    .weekday {
+      color: var(--muted);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: .8px;
+      font-weight: 900;
+      padding: 0 8px 8px;
+    }
+
+    .day {
+      min-height: 150px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02));
+      padding: 10px;
+      transition: .15s ease;
+      overflow: hidden;
+    }
+
+    .day.other-month { opacity: .33; }
+    .day.today { outline: 2px solid rgba(216,195,165,.62); }
+    .day.drop-hover { border-color: var(--copper); background: rgba(184,115,51,.12); }
+
+    .day-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      gap: 6px;
+    }
+
+    .date-num { font-weight: 900; color: var(--ink); font-size: 14px; }
+
+    .rest-label {
+      font-size: 11px;
+      color: rgba(245,241,232,.38);
+      border: 1px solid rgba(245,241,232,.08);
+      padding: 5px 8px;
+      border-radius: 999px;
+      display: inline-flex;
+      margin-top: 8px;
+    }
+
+    .session {
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--silver);
+      border-radius: 16px;
+      padding: 10px;
+      margin-bottom: 8px;
+      background: rgba(18,18,18,.88);
+      box-shadow: 0 12px 26px rgba(0,0,0,.22);
+      cursor: grab;
+      transition: .16s ease;
+    }
+
+    .session:hover { transform: translateY(-2px); border-color: rgba(245,241,232,.24); }
+    .session.running { border-left-color: var(--silver); }
+    .session.hyrox { border-left-color: var(--copper); }
+    .session.strength { border-left-color: var(--beige); }
+    .session.optional, .session.recovery { border-left-color: #777; }
+    .session.race { border-left-color: var(--burgundy); }
+
+    .session-title {
+      display: block;
+      font-size: 13px;
+      font-weight: 900;
+      color: var(--ink);
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+
+    .session-goal {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .tag-row { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+
+    .tag {
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      padding: 5px 7px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      color: var(--muted);
+      border: 1px solid rgba(255,255,255,.06);
+    }
+
+    .status-completado .tag.status { color: #d7ffd7; background: rgba(110,165,110,.16); }
+    .status-adaptado .tag.status { color: #ffe7b0; background: rgba(198,161,91,.16); }
+    .status-cancelado .tag.status { color: #ffd2d2; background: rgba(166,66,66,.16); }
+
+    .side { display: grid; gap: 14px; }
+    .side-card { padding: 18px; }
+    .side-card h3 { margin: 0 0 12px; font-size: 16px; }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .metric-row:last-child { border-bottom: 0; }
+    .metric-row strong { color: var(--ink); }
+
+    .readiness {
+      padding: 14px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.045);
+      border: 1px solid var(--line);
+      margin-top: 10px;
+    }
+
+    .readiness.green { border-color: rgba(110,165,110,.35); background: rgba(110,165,110,.11); }
+    .readiness.yellow { border-color: rgba(198,161,91,.4); background: rgba(198,161,91,.11); }
+    .readiness.red { border-color: rgba(166,66,66,.4); background: rgba(166,66,66,.11); }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.78);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      z-index: 99;
+      backdrop-filter: blur(8px);
+    }
+
+    .modal.open { display: flex; }
+
+    .modal-card {
+      width: min(980px, 100%);
+      max-height: 92vh;
+      overflow: auto;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)),
+        #121212;
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      padding: 20px;
+      box-shadow: 0 30px 120px rgba(0,0,0,.62);
+    }
+
+    .modal-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+    }
+
+    .modal-top h2 { margin: 0 0 5px; font-size: 26px; letter-spacing: -.7px; }
+    .modal-top p { margin: 0; color: var(--muted); }
+
+    .close {
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,.06);
+      color: var(--ink);
+      font-size: 22px;
+    }
+
+    .modal-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 0; }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .info-block {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 16px;
+      background: rgba(255,255,255,.035);
+    }
+
+    .info-block.full { grid-column: 1 / -1; }
+    .info-block h4 { margin: 0 0 10px; color: var(--beige); }
+    .info-block p { color: rgba(245,241,232,.78); line-height: 1.6; font-size: 14px; margin: 0; }
+
+    .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+    label {
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      color: var(--muted);
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+
+    input, textarea, select.field {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.24);
+      color: var(--ink);
+      border-radius: 14px;
+      padding: 11px;
+      outline: none;
+    }
+
+    textarea { min-height: 92px; resize: vertical; }
+
+    .strength-table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 16px;
+      font-size: 13px;
+    }
+
+    .strength-table th, .strength-table td {
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      padding: 9px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .strength-table th {
+      color: var(--beige);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      background: rgba(216,195,165,.07);
+    }
+
+    .strength-table input { padding: 8px; border-radius: 10px; min-width: 72px; }
+    .strength-table input[type="checkbox"] { width: auto; min-width: auto; }
+
+    .image-preview {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .image-preview img {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+    }
+
+    .copy-box {
+      white-space: pre-wrap;
+      background: rgba(0,0,0,.32);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      color: rgba(245,241,232,.84);
+      font-size: 13px;
+      line-height: 1.55;
+      max-height: 260px;
+      overflow: auto;
+    }
+
+    .hidden { display: none !important; }
+
+
+    /* V4 · iOS Performance refinements */
+    .ios-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 8px 0 0;
+      scrollbar-width: none;
+    }
+    .ios-tabs::-webkit-scrollbar { display: none; }
+
+    .mini-chart {
+      height: 120px;
+      display: flex;
+      align-items: end;
+      gap: 8px;
+      padding-top: 12px;
+    }
+    .bar-wrap {
+      flex: 1;
+      min-width: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+    }
+    .bar {
+      width: 100%;
+      max-width: 28px;
+      border-radius: 999px 999px 6px 6px;
+      background: linear-gradient(180deg, var(--beige), rgba(184,115,51,.55));
+      min-height: 8px;
+      box-shadow: 0 8px 20px rgba(184,115,51,.18);
+    }
+
+    .day-actions { display: flex; gap: 6px; align-items: center; }
+
+    .day-add {
+      width: 26px;
+      height: 26px;
+      padding: 0;
+      border-radius: 50%;
+      font-size: 16px;
+      line-height: 1;
+      background: rgba(216,195,165,.10);
+      color: var(--beige);
+      border: 1px solid rgba(216,195,165,.20);
+      box-shadow: none;
+    }
+
+    .day-summary { display: flex; gap: 5px; flex-wrap: wrap; margin: 6px 0 8px; }
+
+    .dot-pill {
+      font-size: 9px;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+      font-weight: 900;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.05);
+      color: var(--muted);
+      padding: 4px 6px;
+      border-radius: 999px;
+    }
+
+    .dot-pill.running { color: var(--silver); }
+    .dot-pill.hyrox { color: var(--copper); }
+    .dot-pill.strength { color: var(--beige); }
+    .dot-pill.race { color: #ffb4b4; }
+
+    .session-mini-actions { display: flex; gap: 6px; margin-top: 8px; }
+
+    .mini-btn {
+      padding: 6px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      box-shadow: none;
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+    }
+
+    .mini-btn.danger {
+      color: #ffb4b4;
+      border-color: rgba(166,66,66,.28);
+      background: rgba(166,66,66,.10);
+    }
+
+    @media (max-width: 760px) {
+      body {
+        background:
+          radial-gradient(circle at 50% -10%, rgba(184,115,51,.22), transparent 28%),
+          linear-gradient(180deg, #050505 0%, #101010 100%);
+      }
+
+      .hero {
+        margin-top: 4px;
+        padding: 20px 16px;
+        border-radius: 28px;
+        background:
+          linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.025)),
+          #101010;
+      }
+
+      .hero h1 { font-size: 42px; letter-spacing: -1.6px; }
+      .hero p { font-size: 14px; }
+
+      .controls-wrap {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        margin: 12px 0;
+        padding-top: 6px;
+        backdrop-filter: blur(18px);
+      }
+
+      .controls {
+        display: grid;
+        grid-template-columns: 1fr auto auto auto;
+        gap: 8px;
+        padding: 8px;
+        border-radius: 24px;
+        background: rgba(18,18,18,.86);
+      }
+
+      select, button { padding: 11px 12px; font-size: 13px; }
+      .panel { border-radius: 28px; }
+      .calendar { padding: 10px; }
+      .month-grid { display: grid; gap: 10px; }
+
+      .day {
+        border-radius: 22px;
+        padding: 12px;
+        background:
+          linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.025)),
+          rgba(18,18,18,.84);
+      }
+
+      .day-top { margin-bottom: 6px; }
+      .date-num { font-size: 18px; }
+      .session { border-radius: 18px; padding: 12px; }
+      .session-title { font-size: 14px; }
+      .side-card { border-radius: 26px; }
+
+      .modal-card {
+        border-radius: 28px 28px 0 0;
+        max-height: 90vh;
+        align-self: end;
+      }
+
+      .more-menu { left: 0; right: 0; width: 100%; }
+    }
+
+    @media (max-width: 1100px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 760px) {
+      .app { padding: 14px 10px 40px; }
+      .hero { padding: 22px 16px; border-radius: 24px; }
+      .weekdays { display: none; }
+      .month-grid { grid-template-columns: 1fr; }
+      .day { min-height: auto; }
+      .day.other-month { display: none; }
+      .info-grid, .form-grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr; }
+      .panel-head { flex-direction: column; align-items: flex-start; }
+    }
+  
+    /* V5 · Apple / iOS inspired redesign */
+    :root {
+      --bg: #f5f5f7;
+      --card: #ffffff;
+      --ink: #1d1d1f;
+      --muted: #6e6e73;
+      --line: rgba(0,0,0,.08);
+      --silver: #86868b;
+      --beige: #a06a2b;
+      --copper: #bf6b2f;
+      --burgundy: #8b1e2d;
+      --green: #34c759;
+      --yellow: #ff9f0a;
+      --red: #ff3b30;
+      --shadow: 0 18px 48px rgba(0,0,0,.08);
+    }
+
+    body {
+      background: #f5f5f7 !important;
+      color: var(--ink) !important;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app { max-width: 1360px; padding-top: 26px; }
+
+    .hero {
+      background: linear-gradient(180deg, #ffffff 0%, #fbfbfd 100%) !important;
+      border: 1px solid rgba(0,0,0,.08) !important;
+      box-shadow: 0 18px 45px rgba(0,0,0,.08) !important;
+      color: var(--ink) !important;
+      border-radius: 34px !important;
+    }
+
+    .hero::after { background: radial-gradient(circle, rgba(191,107,47,.14), transparent 65%) !important; }
+
+    .eyebrow {
+      background: #f5f5f7 !important;
+      border: 1px solid rgba(0,0,0,.08) !important;
+      color: #6e6e73 !important;
+    }
+
+    .hero h1 { color: #1d1d1f !important; letter-spacing: -2.6px; }
+
+    .hero p { color: #6e6e73 !important; font-size: 17px; max-width: 920px; }
+
+    .stat {
+      background: #f5f5f7 !important;
+      border: 1px solid rgba(0,0,0,.08) !important;
+      box-shadow: none !important;
+    }
+
+    .stat span { color: #86868b !important; }
+    .stat strong { color: #1d1d1f !important; }
+
+    .controls-wrap { margin: 18px 0 16px !important; }
+
+    .controls {
+      background: rgba(255,255,255,.78) !important;
+      border: 1px solid rgba(0,0,0,.08) !important;
+      box-shadow: 0 12px 35px rgba(0,0,0,.06);
+      backdrop-filter: blur(18px);
+    }
+
+    select, button {
+      background: #ffffff !important;
+      color: #1d1d1f !important;
+      border: 1px solid rgba(0,0,0,.10) !important;
+      box-shadow: none !important;
+    }
+
+    button.primary {
+      background: #1d1d1f !important;
+      color: #ffffff !important;
+      border-color: #1d1d1f !important;
+    }
+
+    button.secondary { color: #1d1d1f !important; }
+
+    .more-menu {
+      background: rgba(255,255,255,.92) !important;
+      border: 1px solid rgba(0,0,0,.08) !important;
+      box-shadow: 0 20px 60px rgba(0,0,0,.12) !important;
+    }
+
+    .dashboard-grid { display: block !important; }
+
+    .info-drawer { margin-bottom: 16px; }
+
+    .info-toggle {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 2px 14px;
+      align-items: center;
+      text-align: left;
+      padding: 18px 20px !important;
+      border-radius: 26px !important;
+      background: #ffffff !important;
+      border: 1px solid rgba(0,0,0,.08) !important;
+      box-shadow: 0 12px 35px rgba(0,0,0,.06) !important;
+    }
+
+    .info-toggle span { font-size: 20px; font-weight: 900; letter-spacing: -.4px; }
+    .info-toggle small { color: #6e6e73; font-weight: 700; grid-column: 1; }
+    .info-toggle strong { grid-row: 1 / span 2; grid-column: 2; font-size: 24px; color: #6e6e73; }
+
+    .drawer-content {
+      display: none;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 12px;
+    }
+
+    .drawer-content.open { display: grid; }
+
+    .panel, .side-card {
+      background: #ffffff !important;
+      border: 1px solid rgba(0,0,0,.08) !important;
+      box-shadow: 0 18px 45px rgba(0,0,0,.07) !important;
+    }
+
+    .panel-head {
+      background: #ffffff !important;
+      border-bottom: 1px solid rgba(0,0,0,.08) !important;
+    }
+
+    .panel-head h2 { color: #1d1d1f !important; font-size: 24px; }
+    .panel-head small { color: #86868b !important; }
+
+    .weekday { color: #86868b !important; }
+
+    .day {
+      background: #fbfbfd !important;
+      border: 1px solid rgba(0,0,0,.07) !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
+    }
+
+    .day.today { outline: 2px solid rgba(0,0,0,.18) !important; }
+
+    .date-num, .session-title { color: #1d1d1f !important; }
+
+    .rest-label {
+      color: #86868b !important;
+      border: 1px solid rgba(0,0,0,.08) !important;
+      background: #ffffff;
+    }
+
+    .session {
+      background: #ffffff !important;
+      border: 1px solid rgba(0,0,0,.08) !important;
+      border-left: 5px solid #86868b !important;
+      box-shadow: 0 8px 22px rgba(0,0,0,.06) !important;
+    }
+
+    .session.running { border-left-color: #8e8e93 !important; }
+    .session.hyrox { border-left-color: #bf6b2f !important; }
+    .session.strength { border-left-color: #a06a2b !important; }
+    .session.optional, .session.recovery { border-left-color: #c7c7cc !important; }
+    .session.race { border-left-color: #8b1e2d !important; }
+
+    .session-goal, .metric-row, .tag, .dot-pill { color: #6e6e73 !important; }
+
+    .tag, .dot-pill {
+      background: #f5f5f7 !important;
+      border: 1px solid rgba(0,0,0,.06) !important;
+    }
+
+    .day-add {
+      background: #1d1d1f !important;
+      color: #ffffff !important;
+      border-color: #1d1d1f !important;
+    }
+
+    .mini-btn {
+      background: #f5f5f7 !important;
+      color: #1d1d1f !important;
+      border: 1px solid rgba(0,0,0,.08) !important;
+    }
+
+    .readiness {
+      background: #f5f5f7 !important;
+      border: 1px solid rgba(0,0,0,.08) !important;
+      color: #1d1d1f;
+    }
+
+    .modal {
+      background: rgba(245,245,247,.72) !important;
+      backdrop-filter: blur(18px);
+    }
+
+    .modal-card {
+      background: #ffffff !important;
+      border: 1px solid rgba(0,0,0,.08) !important;
+      box-shadow: 0 28px 90px rgba(0,0,0,.16) !important;
+      color: #1d1d1f !important;
+    }
+
+    .modal-top { border-bottom: 1px solid rgba(0,0,0,.08) !important; }
+
+    .modal-top h2, .info-block h4, .side-card h3 { color: #1d1d1f !important; }
+
+    .modal-top p, .info-block p { color: #6e6e73 !important; }
+
+    .info-block {
+      background: #fbfbfd !important;
+      border: 1px solid rgba(0,0,0,.08) !important;
+    }
+
+    input, textarea, select.field {
+      background: #ffffff !important;
+      border: 1px solid rgba(0,0,0,.10) !important;
+      color: #1d1d1f !important;
+    }
+
+    label { color: #86868b !important; }
+
+    .copy-box {
+      background: #f5f5f7 !important;
+      color: #1d1d1f !important;
+      border: 1px solid rgba(0,0,0,.08) !important;
+    }
+
+    .strength-table th {
+      background: #f5f5f7 !important;
+      color: #1d1d1f !important;
+    }
+
+    .strength-table th, .strength-table td { border-bottom: 1px solid rgba(0,0,0,.07) !important; }
+
+    .danger-zone {
+      background: #fff5f5 !important;
+      border-color: rgba(255,59,48,.18) !important;
+    }
+
+    .danger-zone h4 { color: #8b1e2d !important; }
+
+    .danger-button {
+      background: #8b1e2d !important;
+      color: #ffffff !important;
+      border-color: #8b1e2d !important;
+    }
+
+    .bar {
+      background: linear-gradient(180deg, #1d1d1f, #86868b) !important;
+      box-shadow: none !important;
+    }
+
+    @media (max-width: 960px) {
+      .drawer-content.open { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      body { background: #f5f5f7 !important; }
+
+      .hero {
+        background: #ffffff !important;
+        border-radius: 28px !important;
+      }
+
+      .hero h1 {
+        font-size: 40px !important;
+        letter-spacing: -1.8px !important;
+      }
+
+      .controls {
+        grid-template-columns: 1fr auto auto auto;
+        background: rgba(255,255,255,.86) !important;
+      }
+
+      .modal-card { border-radius: 28px 28px 0 0 !important; }
+
+      .day { background: #ffffff !important; }
+    }
+
+  
+    /* V6 · Performance identity */
+    :root {
+      --accent: #c26b35;
+      --accent-soft: rgba(194,107,53,.12);
+      --navy: #16202a;
+      --mist: #f5f5f7;
+      --track: #e9e9ed;
+      --success: #2f855a;
+      --warning: #b7791f;
+      --risk: #9b2c2c;
+    }
+
+    .hero {
+      background:
+        radial-gradient(circle at 92% 12%, rgba(194,107,53,.18), transparent 24%),
+        linear-gradient(180deg, #ffffff 0%, #fbfbfd 100%) !important;
+    }
+
+    .stat strong#heroCompleted,
+    .stat strong#heroKm,
+    .stat strong#heroRpe,
+    .stat strong#heroPain {
+      color: var(--accent) !important;
+    }
+
+    .today-command {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: center;
+      background:
+        radial-gradient(circle at 100% 0%, rgba(194,107,53,.16), transparent 28%),
+        linear-gradient(135deg, #1d1d1f 0%, #2a211b 100%);
+      color: #fff;
+      border-radius: 32px;
+      padding: 22px;
+      margin: 18px 0 14px;
+      box-shadow: 0 18px 42px rgba(0,0,0,.12);
+    }
+
+    .section-kicker {
+      display: inline-flex;
+      margin-bottom: 8px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      font-weight: 900;
+      color: rgba(255,255,255,.62);
+    }
+
+    .today-command h2 {
+      margin: 0 0 8px;
+      font-size: clamp(24px, 4vw, 38px);
+      letter-spacing: -1px;
+    }
+
+    .today-command p {
+      margin: 0;
+      color: rgba(255,255,255,.72);
+      line-height: 1.5;
+      max-width: 900px;
+    }
+
+    .today-status {
+      min-width: 116px;
+      min-height: 116px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-weight: 950;
+      font-size: 18px;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.18);
+      backdrop-filter: blur(12px);
+    }
+
+    .today-status.green { background: rgba(47,133,90,.28); color: #d9ffe8; }
+    .today-status.yellow { background: rgba(183,121,31,.28); color: #fff1cc; }
+    .today-status.red { background: rgba(155,44,44,.30); color: #ffd9d9; }
+
+    .week-visuals {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin: 14px 0;
+    }
+
+    .week-card, .insight-card {
+      background: #ffffff;
+      border: 1px solid rgba(0,0,0,.08);
+      border-radius: 28px;
+      box-shadow: 0 16px 40px rgba(0,0,0,.06);
+    }
+
+    .week-card {
+      padding: 18px;
+      min-height: 128px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .week-card::after {
+      content: "";
+      position: absolute;
+      right: -36px;
+      bottom: -48px;
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+    }
+
+    .week-card span {
+      color: #86868b;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .7px;
+    }
+
+    .week-card strong {
+      font-size: 27px;
+      letter-spacing: -1px;
+      color: #1d1d1f;
+      z-index: 1;
+    }
+
+    .week-card small {
+      color: #6e6e73;
+      font-weight: 700;
+      z-index: 1;
+    }
+
+    .insight-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 14px 0 16px;
+    }
+
+    .insight-card {
+      padding: 18px;
+    }
+
+    .insight-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      margin-bottom: 12px;
+    }
+
+    .insight-head h3 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: -.3px;
+    }
+
+    .insight-head span {
+      color: #86868b;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .history-list, .alerts-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .history-item, .alert-item {
+      padding: 12px;
+      border-radius: 18px;
+      background: #f5f5f7;
+      border: 1px solid rgba(0,0,0,.06);
+      display: grid;
+      gap: 4px;
+    }
+
+    .history-item strong, .alert-item strong {
+      color: #1d1d1f;
+      font-size: 14px;
+    }
+
+    .history-item span, .alert-item span {
+      color: #6e6e73;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .alert-item.green { background: rgba(47,133,90,.08); border-color: rgba(47,133,90,.18); }
+    .alert-item.yellow { background: rgba(183,121,31,.09); border-color: rgba(183,121,31,.20); }
+    .alert-item.red { background: rgba(155,44,44,.08); border-color: rgba(155,44,44,.20); }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .trend-chart {
+      height: 142px;
+      display: flex;
+      align-items: end;
+      gap: 8px;
+      padding: 10px 4px 2px;
+      border-radius: 18px;
+      background: #f5f5f7;
+      border: 1px solid rgba(0,0,0,.06);
+      overflow-x: auto;
+    }
+
+    .trend-col {
+      min-width: 38px;
+      flex: 1;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      gap: 6px;
+      align-items: end;
+      justify-items: center;
+    }
+
+    .trend-bars {
+      height: 96px;
+      display: flex;
+      align-items: end;
+      gap: 3px;
+    }
+
+    .trend-bar {
+      width: 8px;
+      min-height: 4px;
+      border-radius: 999px;
+      background: #1d1d1f;
+    }
+
+    .trend-bar.rpe { background: var(--accent); }
+    .trend-bar.pain { background: #9b2c2c; }
+
+    .trend-col span {
+      font-size: 10px;
+      color: #86868b;
+      font-weight: 800;
+    }
+
+    .mini-chart {
+      background: #f5f5f7;
+      border: 1px solid rgba(0,0,0,.06);
+      border-radius: 18px;
+      padding: 12px;
+      height: 142px !important;
+    }
+
+    .bar {
+      background: linear-gradient(180deg, var(--accent), #1d1d1f) !important;
+    }
+
+    .session.hyrox { border-left-color: var(--accent) !important; }
+    .session.strength { border-left-color: #a06a2b !important; }
+    .session.running { border-left-color: #5f6c7b !important; }
+    .session.race { border-left-color: #9b2c2c !important; }
+
+    @media (max-width: 960px) {
+      .week-visuals, .insight-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .today-command {
+        grid-template-columns: 1fr;
+        border-radius: 28px;
+      }
+
+      .today-status {
+        min-width: 84px;
+        min-height: 84px;
+        justify-self: start;
+      }
+
+      .week-visuals, .insight-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .week-card {
+        min-height: 108px;
+      }
+    }
+
+  
+    /* V7.1 · Registro dinámico estable */
+    :root {
+      --run: #4f6f8f;
+      --hyrox: #c26b35;
+      --strength: #9b6a2f;
+      --recovery: #6e6e73;
+      --race: #8b1e2d;
+      --soft-blue: rgba(79,111,143,.12);
+      --soft-copper: rgba(194,107,53,.13);
+      --soft-gold: rgba(155,106,47,.13);
+      --soft-red: rgba(139,30,45,.10);
+    }
+
+    .session.running { border-left-color: var(--run) !important; }
+    .session.hyrox { border-left-color: var(--hyrox) !important; }
+    .session.strength { border-left-color: var(--strength) !important; }
+    .session.optional, .session.recovery { border-left-color: var(--recovery) !important; }
+    .session.race { border-left-color: var(--race) !important; }
+
+    .training-log-block {
+      background: linear-gradient(180deg, #ffffff 0%, #fbfbfd 100%) !important;
+      border: 1px solid rgba(0,0,0,.08) !important;
+    }
+
+    .log-header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: start;
+      margin-bottom: 14px;
+    }
+
+    .log-header h4 { margin-bottom: 4px !important; }
+
+    .log-header p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.45;
+      color: #6e6e73 !important;
+    }
+
+    .rpe-widget {
+      min-width: 250px;
+      padding: 12px;
+      border-radius: 20px;
+      background: #f5f5f7;
+      border: 1px solid rgba(0,0,0,.06);
+    }
+
+    .rpe-buttons {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .rpe-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px !important;
+      padding: 0 !important;
+      font-size: 13px !important;
+      font-weight: 900 !important;
+      background: #ffffff !important;
+      border: 1px solid rgba(0,0,0,.10) !important;
+      color: #1d1d1f !important;
+    }
+
+    .rpe-btn.low { background: rgba(47,133,90,.10) !important; color: #2f855a !important; }
+    .rpe-btn.mid { background: rgba(194,107,53,.10) !important; color: #a05224 !important; }
+    .rpe-btn.high { background: rgba(155,44,44,.10) !important; color: #9b2c2c !important; }
+
+    .rpe-btn.selected {
+      transform: scale(1.08);
+      box-shadow: 0 8px 18px rgba(0,0,0,.12) !important;
+      border-color: currentColor !important;
+    }
+
+    .dynamic-log-card {
+      padding: 14px;
+      border-radius: 22px;
+      background: #f5f5f7;
+      border: 1px solid rgba(0,0,0,.06);
+      margin-bottom: 12px;
+    }
+
+    .quick-feedback { margin: 12px 0; }
+
+    .quick-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    .quick-chip {
+      border-radius: 999px !important;
+      padding: 9px 12px !important;
+      background: #f5f5f7 !important;
+      color: #1d1d1f !important;
+      border: 1px solid rgba(0,0,0,.08) !important;
+      font-size: 13px !important;
+    }
+
+    .quick-chip.active {
+      background: #1d1d1f !important;
+      color: #fff !important;
+      border-color: #1d1d1f !important;
+    }
+
+    .session-reading {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(79,111,143,.12), rgba(194,107,53,.10));
+      border: 1px solid rgba(0,0,0,.06);
+      display: grid;
+      gap: 4px;
+    }
+
+    .session-reading strong { color: #1d1d1f; }
+
+    .session-reading span {
+      color: #6e6e73;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .modal-card.session-running .training-log-block { border-top: 5px solid var(--run) !important; }
+    .modal-card.session-hyrox .training-log-block { border-top: 5px solid var(--hyrox) !important; }
+    .modal-card.session-strength .training-log-block { border-top: 5px solid var(--strength) !important; }
+    .modal-card.session-optional .training-log-block { border-top: 5px solid var(--recovery) !important; }
+    .modal-card.session-race .training-log-block { border-top: 5px solid var(--race) !important; }
+
+    @media (max-width: 760px) {
+      .log-header { grid-template-columns: 1fr; }
+      .rpe-widget { min-width: auto; }
+      .rpe-buttons { grid-template-columns: repeat(10, 1fr); }
+      .rpe-btn { width: 30px; height: 30px; font-size: 12px !important; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="hero">
+      <div class="eyebrow">Hybrid Performance System</div>
+      <h1>Planificación Asier</h1>
+      <p>Planificación PRO de 16 semanas: running como prioridad, Hyrox específico, fuerza funcional, registro post-entreno y adaptación semanal.</p>
+      <div class="stats">
+        <div class="stat"><span>Sesiones completadas</span><strong id="heroCompleted">0</strong></div>
+        <div class="stat"><span>Km registrados</span><strong id="heroKm">0</strong></div>
+        <div class="stat"><span>RPE medio</span><strong id="heroRpe">-</strong></div>
+        <div class="stat"><span>Dolor máximo</span><strong id="heroPain">-</strong></div>
+      </div>
+    </section>
+
+    <div class="controls-wrap">
+      <div class="controls">
+        <select id="monthSelect"></select>
+        <button class="primary" onclick="goToday()">Hoy</button>
+        <button class="secondary" onclick="openWeeklyReview()">Resumen semanal</button>
+        <button class="secondary" onclick="toggleMoreMenu()">Más información</button>
+      </div>
+      <div class="more-menu" id="moreMenu">
+        <button class="secondary" onclick="openNewSessionModal()">+ Nueva sesión</button>
+        <button class="secondary" onclick="saveLayout()">Guardar cambios</button>
+        <button class="secondary" onclick="resetLayout()">Restaurar planificación</button>
+        <button class="secondary" onclick="copyWeekSummary()">Copiar resumen semana</button>
+        <button class="secondary" onclick="exportData()">Exportar datos</button>
+        <button class="secondary" onclick="openImportModal()">Importar datos</button>
+      </div>
+    </div>
+<section class="week-visuals">
+      <div class="week-card">
+        <span>Semana actual</span>
+        <strong id="weekSessions">0 sesiones</strong>
+        <small id="weekFocus">Sin datos todavía</small>
+      </div>
+      <div class="week-card">
+        <span>Carga estimada</span>
+        <strong id="weekLoad">—</strong>
+        <small id="weekLoadNote">Duración x RPE</small>
+      </div>
+      <div class="week-card">
+        <span>Running</span>
+        <strong id="weekKm">0 km</strong>
+        <small>Volumen registrado</small>
+      </div>
+      <div class="week-card">
+        <span>Riesgo</span>
+        <strong id="weekRisk">—</strong>
+        <small id="weekRiskNote">Según RPE/dolor</small>
+      </div>
+    </section>
+
+    <section class="insight-grid">
+      <div class="insight-card">
+        <div class="insight-head">
+          <h3>Histórico real</h3>
+          <span>Últimos registros</span>
+        </div>
+        <div id="historyList" class="history-list"></div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-head">
+          <h3>Alertas</h3>
+          <span>Control de carga</span>
+        </div>
+        <div id="alertsList" class="alerts-list"></div>
+      </div>
+    </section>
+
+    <div class="dashboard-grid">
+      <main class="panel">
+        <div class="panel-head">
+          <div>
+            <h2 id="monthTitle">Calendario</h2>
+            <small>Arrastra sesiones entre días. Los días vacíos aparecen como descanso.</small>
+          </div>
+          <small id="monthMeta"></small>
+        </div>
+        <div class="calendar">
+          <div class="weekdays">
+            <div class="weekday">Lun</div><div class="weekday">Mar</div><div class="weekday">Mié</div><div class="weekday">Jue</div><div class="weekday">Vie</div><div class="weekday">Sáb</div><div class="weekday">Dom</div>
+          </div>
+          <div id="monthGrid" class="month-grid"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-card">
+      <div class="modal-top">
+        <div>
+          <h2 id="modalTitle"></h2>
+          <p id="modalGoal"></p>
+          <div class="tag-row" id="modalTags"></div>
+        </div>
+        <button class="close" onclick="closeModal()">×</button>
+      </div>
+
+      <div class="modal-actions">
+        <button class="primary" onclick="toggleEdit()" id="editBtn">Editar entreno</button>
+        <button class="secondary" onclick="saveSession()">Guardar sesión</button>
+        <button class="secondary" onclick="copySessionSummary()">Copiar resumen para Rafiki</button>
+        <button class="secondary" onclick="openDuplicateModal()">Duplicar sesión</button>
+      </div>
+
+      <div id="viewMode" class="info-grid" style="margin-top:14px;">
+        <div class="info-block"><h4>Objetivo</h4><p id="vGoal"></p></div>
+        <div class="info-block"><h4>Estado</h4><p id="vStatus"></p></div>
+        <div class="info-block"><h4>Calentamiento</h4><p id="vWarm"></p></div>
+        <div class="info-block"><h4>Vuelta a la calma</h4><p id="vCool"></p></div>
+        <div class="info-block full"><h4>Bloque principal</h4><p id="vMain"></p></div>
+        <div class="info-block full"><h4>Nota coach</h4><p id="vNote"></p></div>
+      </div>
+
+      <div id="editMode" class="hidden" style="margin-top:14px;">
+        <div class="form-grid">
+          <div><label>Estado</label><select class="field" id="eStatus"><option>Pendiente</option><option>Completado</option><option>Adaptado</option><option>Cancelado</option></select></div>
+          <div><label>Título</label><input id="eTitle"></div>
+          <div><label>Objetivo</label><input id="eGoal"></div>
+        </div>
+        <label>Calentamiento</label><textarea id="eWarm"></textarea>
+        <label>Bloque principal</label><textarea id="eMain"></textarea>
+        <label>Vuelta a la calma</label><textarea id="eCool"></textarea>
+        <label>Nota coach</label><textarea id="eNote"></textarea>
+      </div>
+
+      <div class="info-grid" style="margin-top:14px;">
+        <div class="info-block full" id="strengthBlock">
+          <h4>Seguimiento de fuerza</h4>
+          <table class="strength-table" id="strengthTable"></table>
+        </div>
+
+        <div class="info-block full training-log-block">
+          <div class="log-header">
+            <div>
+              <h4 id="logTitle">Registro post-entreno</h4>
+              <p id="logSubtitle">Registro adaptado al tipo de sesión.</p>
+            </div>
+            <div class="rpe-widget">
+              <label>RPE sesión</label>
+              <div class="rpe-buttons" id="rpeButtons"></div>
+              <input id="logRpe" type="hidden">
+            </div>
+          </div>
+
+          <div id="dynamicLogFields" class="dynamic-log-card"></div>
+
+          <div class="quick-feedback">
+            <label>Feedback rápido</label>
+            <div class="quick-row">
+              <button type="button" class="quick-chip" onclick="setQuickFeel('Bien')">Bien</button>
+              <button type="button" class="quick-chip" onclick="setQuickFeel('Normal')">Normal</button>
+              <button type="button" class="quick-chip" onclick="setQuickFeel('Cargado/a')">Cargado/a</button>
+              <button type="button" class="quick-chip" onclick="setQuickFeel('Dolor/molestia')">Dolor/molestia</button>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div><label>Sensaciones</label><input id="logFeel" placeholder="Bien / normal / cargado..."></div>
+            <div><label>Dolor sóleo/tobillo 0-10</label><input id="logPain" type="number" min="0" max="10"></div>
+            <div><label>Capturas Apple/Amazfit</label><input id="imageInput" type="file" accept="image/*" multiple onchange="handleImages(event)"></div>
+          </div>
+
+          <label>Qué ajustaría / aprendizaje</label>
+          <textarea id="logNotes" placeholder="Qué ha ido bien, qué cambiarías, molestias, estrategia, ajustes para la próxima sesión..."></textarea>
+
+          <div class="session-reading" id="sessionReading">
+            <strong>Lectura del entreno:</strong>
+            <span>Completa RPE, dolor y sensaciones para generar una lectura rápida.</span>
+          </div>
+
+          <div id="imagePreview" class="image-preview"></div>
+        </div>
+
+        <div class="info-block full">
+          <h4>Adaptación Rafiki</h4>
+          <p style="color:rgba(245,241,232,.68); font-size:13px; line-height:1.5; margin-top:0;">Pega aquí la adaptación que te proponga Rafiki. Al aplicarla, se sustituirá el bloque principal y la sesión quedará marcada como adaptada.</p>
+          <textarea id="rafikiAdaptation" placeholder="Ejemplo: Cambiar 5x800m por 25’ Z2 + 5 progresivos. Reducir intensidad por dolor de sóleo..."></textarea>
+          <div class="modal-actions">
+            <button class="primary" onclick="applyRafikiAdaptation()">Aplicar adaptación</button>
+            <button class="secondary" onclick="restoreOriginalSession()">Restaurar bloque original</button>
+          </div>
+        </div>
+
+        <div class="info-block full">
+          <h4>Resumen para Rafiki</h4>
+          <div id="copyBox" class="copy-box">Guarda o completa datos para generar un resumen.</div>
+        </div>
+
+        <div class="info-block full danger-zone">
+          <h4>Zona avanzada</h4>
+          <p>Usa esta opción solo si quieres eliminar definitivamente esta sesión del calendario.</p>
+          <button class="danger-button" onclick="deleteCurrentSession()">Borrar esta sesión</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="weeklyModal">
+    <div class="modal-card">
+      <div class="modal-top">
+        <div>
+          <h2>Resumen semanal</h2>
+          <p>Revisión de progreso, carga y puntos a ajustar para próximas semanas.</p>
+        </div>
+        <button class="close" onclick="closeWeeklyReview()">×</button>
+      </div>
+      <div class="info-grid">
+        <div class="info-block"><h4>Sesiones</h4><p id="wrSessions"></p></div>
+        <div class="info-block"><h4>Running</h4><p id="wrRunning"></p></div>
+        <div class="info-block"><h4>Estado físico</h4><p id="wrBody"></p></div>
+        <div class="info-block"><h4>Recomendación</h4><p id="wrAdvice"></p></div>
+        <div class="info-block full"><h4>Notas de la semana</h4><textarea id="weeklyNotes" placeholder="Qué ha ido bien, qué se ha complicado, molestias, trabajo, sueño..."></textarea></div>
+        <div class="info-block full"><h4>Adaptaciones para próximas semanas</h4><textarea id="weeklyAdjustments" placeholder="Ejemplo: reducir series si dolor sóleo >4/10, mantener Z2, cambiar fuerza pesada por express..."></textarea></div>
+        <div class="info-block full"><h4>Resumen para Rafiki</h4><div id="weeklyCopyBox" class="copy-box"></div></div>
+      </div>
+      <div class="modal-actions">
+        <button class="primary" onclick="saveWeeklyReview()">Guardar revisión</button>
+        <button class="secondary" onclick="copyWeeklyReview()">Copiar para Rafiki</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal" id="sessionFormModal">
+    <div class="modal-card">
+      <div class="modal-top">
+        <div>
+          <h2 id="sessionFormTitle">Nueva sesión</h2>
+          <p>Crea una sesión personal o duplica una sesión existente para otro día.</p>
+        </div>
+        <button class="close" onclick="closeSessionFormModal()">×</button>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-block full">
+          <h4>Datos principales</h4>
+          <div class="form-grid">
+            <div><label>Fecha</label><input id="nfDate" type="date"></div>
+            <div><label>Tipo</label><select class="field" id="nfType"><option value="running">Running</option><option value="hyrox">Hyrox</option><option value="strength">Fuerza</option><option value="optional">Recovery</option><option value="race">Competición</option></select></div>
+            <div><label>Título</label><input id="nfTitle" placeholder="Ej: Running Z2"></div>
+          </div>
+          <label>Objetivo</label><input id="nfGoal" placeholder="Ej: Base aeróbica / fuerza específica / recovery">
+        </div>
+
+        <div class="info-block"><h4>Calentamiento</h4><textarea id="nfWarm" placeholder="Calentamiento..."></textarea></div>
+        <div class="info-block"><h4>Vuelta a la calma</h4><textarea id="nfCool" placeholder="Vuelta a la calma..."></textarea></div>
+        <div class="info-block full"><h4>Bloque principal</h4><textarea id="nfMain" placeholder="Bloque principal..."></textarea></div>
+        <div class="info-block full"><h4>Nota coach</h4><textarea id="nfNote" placeholder="Notas o intención de la sesión..."></textarea></div>
+
+        <div class="info-block full">
+          <h4>Fuerza visual opcional</h4>
+          <p style="color:rgba(245,241,232,.68); font-size:13px; line-height:1.5; margin-top:0;">Si es una sesión de fuerza, añade ejercicios en formato: Ejercicio | Series | Reps | Peso objetivo | Descanso | Notas. Una línea por ejercicio.</p>
+          <textarea id="nfStrength" placeholder="Sentadilla | 4 | 5 | 60 kg | 2’ | Técnica&#10;Peso muerto | 4 | 4 | 80 kg | 2’30’’ | Control"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="primary" onclick="saveNewOrDuplicatedSession()">Guardar sesión</button>
+        <button class="secondary" onclick="closeSessionFormModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="importModal">
+    <div class="modal-card">
+      <div class="modal-top">
+        <div>
+          <h2>Importar datos</h2>
+          <p>Pega aquí el contenido exportado desde otro dispositivo. Esto actualizará la planificación, registros, adaptaciones y revisiones guardadas.</p>
+        </div>
+        <button class="close" onclick="closeImportModal()">×</button>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-block full">
+          <h4>Datos exportados</h4>
+          <textarea id="importText" placeholder="Pega aquí el JSON exportado desde el móvil u ordenador..."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="primary" onclick="importData()">Importar datos</button>
+        <button class="secondary" onclick="closeImportModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'asier_dashboard_layout_v1';
+    const SESSION_DATA_KEY = 'asier_dashboard_sessions_v1';
+    const CUSTOM_SESSIONS_KEY = 'asier_dashboard_custom_sessions_v1';
+    const DELETED_SESSIONS_KEY = 'asier_dashboard_deleted_sessions_v1';
+
+    const months = [
+      { id:'2026-05', label:'Mayo 2026', monthIndex:4, year:2026 },
+      { id:'2026-06', label:'Junio 2026', monthIndex:5, year:2026 },
+      { id:'2026-07', label:'Julio 2026', monthIndex:6, year:2026 },
+      { id:'2026-08', label:'Agosto 2026', monthIndex:7, year:2026 }
+    ];
+
+    let sessions = buildInitialSessions().filter(s => !loadDeletedSessions().includes(s.id)).concat(loadCustomSessions());
+    let sessionData = JSON.parse(localStorage.getItem(SESSION_DATA_KEY) || '{}');
+    let currentSessionId = null;
+    let editMode = false;
+
+    function ex(name, sets, reps, target, rest, notes=''){ return {name, sets, reps, target, rest, notes}; }
+
+    function generateId(prefix='custom'){
+      return prefix + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
+    }
+
+    function loadCustomSessions(){
+      try { return JSON.parse(localStorage.getItem(CUSTOM_SESSIONS_KEY) || '[]'); }
+      catch(e){ return []; }
+    }
+
+    function saveCustomSessions(){
+      const custom = sessions.filter(s => s.custom === true);
+      localStorage.setItem(CUSTOM_SESSIONS_KEY, JSON.stringify(custom));
+    }
+
+    function loadDeletedSessions(){
+      try { return JSON.parse(localStorage.getItem(DELETED_SESSIONS_KEY) || '[]'); }
+      catch(e){ return []; }
+    }
+
+    function saveDeletedSession(id){
+      const deleted = new Set(loadDeletedSessions());
+      deleted.add(id);
+      localStorage.setItem(DELETED_SESSIONS_KEY, JSON.stringify([...deleted]));
+    }
+
+    function add(list, id, date, title, type, goal, warm, main, cool, note, strength=[]){
+      list.push({ id, date, title, type, goal, warm, main, cool, note, status:'Pendiente', strength });
+    }
+
+    function buildInitialSessions(){
+      const list = [];
+      add(list,"pro_w01_1","2026-05-11","Hyrox base","hyrox","Control de ritmo + técnica de estaciones","8’ carrera suave. Movilidad tobillo/cadera. 2 rondas: 10 squats + 10 lunges + 10 push ups.","4 rondas: 500m run @5:15–5:25/km + 500m SkiErg + 20 wall balls + 20m farmer carry + 10 burpees. Descanso 2’.","5’ trote suave + gemelo excéntrico 3x15 + movilidad tobillo.","No competir el entreno. Mantén todas las rondas parecidas.",[]);
+      add(list,"pro_w01_2","2026-05-12","Running calidad · 400","running","Velocidad base y técnica","10’ trote suave + skipping/talón-glúteo 2x20m + 3 progresivos.","6x400m @4:25–4:35/km. Descanso 1’30”.","10’ suave + movilidad sóleo/gemelo.","Todas las series iguales. Si la última se cae, has salido demasiado rápido.",[]);
+      add(list,"pro_w01_3","2026-05-14","Fuerza Hyrox base","strength","Básicos + unilateral + carry","5’ bike + movilidad cadera/tobillo/hombro + 2 series de aproximación en sentadilla y PM.","Bloque A básicos. Bloque B transferencia unilateral. Bloque C core.","Movilidad cadera/tobillo + gemelo excéntrico 3x15.","No llegar a fallo. Busca técnica limpia.",[{"name": "Sentadilla", "sets": "4", "reps": "5", "target": "60 kg", "rest": "2’", "notes": "RPE 7"}, {"name": "Peso muerto", "sets": "4", "reps": "4", "target": "80 kg", "rest": "2’", "notes": "Espalda sólida"}, {"name": "Press banca", "sets": "4", "reps": "6", "target": "30 kg", "rest": "90”", "notes": "Controlar bajada"}, {"name": "Bulgarian split squat", "sets": "3", "reps": "8/lad", "target": "10–12 kg", "rest": "75”", "notes": "Rodilla estable"}, {"name": "Walking lunges", "sets": "3", "reps": "12/lad", "target": "Moderado", "rest": "75”", "notes": "Zancada constante"}, {"name": "Farmer carry", "sets": "4", "reps": "30m", "target": "Pesado controlado", "rest": "60”", "notes": "Tronco alto"}, {"name": "Plancha + dead bug", "sets": "3", "reps": "40” + 12 reps", "target": "—", "rest": "45”", "notes": "Core"}]);
+      add(list,"pro_w01_4","2026-05-16","Running largo progresivo","running","Base aeróbica","5’ trote suave + movilidad tobillo.","6km: 4km @6:00–6:20/km + 2km @5:30/km.","Caminar 5’ + movilidad + gemelo.","Termina con sensación de poder hacer 1–2km más.",[]);
+      add(list,"pro_w01_5","2026-05-17","Opcional Z2 + técnica","optional","Recuperación activa","5’ suave + movilidad dinámica.","25’ Z2 @6:15–6:45/km + técnica: skipping, talón-glúteo, zancada corta.","5’ caminar + movilidad tobillo/cadera.","Solo si el sóleo está bien.",[]);
+      add(list,"pro_w02_1","2026-05-18","Hyrox volumen","hyrox","Aumentar volumen sin perder control","8’ run + movilidad + 2 rondas: 10 squats + 10 lunges + 8 push ups.","5 rondas: 600m run @5:10–5:20/km + 500m SkiErg + 20 wall balls + 20m carry + 12 burpees. Descanso 2’.","6’ trote + movilidad.","Más volumen, misma técnica. No aceleres en las 2 primeras rondas.",[]);
+      add(list,"pro_w02_2","2026-05-19","Running calidad · 400+","running","Consolidar velocidad","10’ suave + técnica + 3 progresivos.","7x400m @4:25/km. Descanso 1’30”.","10’ suave + estiramiento sóleo.","El objetivo es regularidad, no marca en una serie.",[]);
+      add(list,"pro_w02_3","2026-05-21","Fuerza Hyrox progresiva","strength","Progresar básicos + sled","5’ bike + movilidad + aproximaciones.","Básicos con ligera subida de carga + accesorios de transferencia.","Movilidad + respiración 3’.","Subida controlada. Técnica por encima del peso.",[{"name": "Sentadilla", "sets": "4", "reps": "5", "target": "62,5 kg", "rest": "2’", "notes": "RPE 7-8"}, {"name": "Peso muerto", "sets": "4", "reps": "4", "target": "85 kg", "rest": "2’", "notes": "Sin fallo"}, {"name": "Press banca", "sets": "4", "reps": "6", "target": "32,5 kg", "rest": "90”", "notes": "Estable"}, {"name": "Step-up", "sets": "3", "reps": "10/lad", "target": "Moderado", "rest": "75”", "notes": "Control de rodilla"}, {"name": "Walking lunges", "sets": "3", "reps": "12/lad", "target": "Moderado", "rest": "75”", "notes": "Transferencia Hyrox"}, {"name": "Sled push", "sets": "4", "reps": "20m", "target": "Medio/pesado", "rest": "75”", "notes": "Empuje bajo"}, {"name": "Pallof press", "sets": "3", "reps": "12/lad", "target": "—", "rest": "45”", "notes": "Core antirotación"}]);
+      add(list,"pro_w02_4","2026-05-23","Running largo 7km","running","Base + final fuerte","5’ suave + 2 progresivos.","7km: 5km Z2 @5:55–6:15/km + 2km @5:20/km.","Caminar + movilidad.","Primer estímulo real de progresión.",[]);
+      add(list,"pro_w02_5","2026-05-24","Opcional Z2","optional","Suma aeróbica sin impacto excesivo","5’ suave.","30’ Z2 @6:10–6:40/km o bici 35’ si sóleo cargado.","Movilidad tobillo/cadera.","No convertir en entreno duro.",[]);
+      add(list,"pro_w03_1","2026-05-25","Hyrox carga alta","hyrox","Densidad y fatiga controlada","10’ run + movilidad + activación: 2 rondas 200m row + 10 squats + 10 lunges.","5 rondas: 600m run @5:00–5:10/km + 500m Row + 16 wall balls + 20m carry + 12 burpees. Descanso 90”.","6–8’ suave + movilidad.","Primer entreno exigente real. Mantén los splits.",[]);
+      add(list,"pro_w03_2","2026-05-26","Running calidad · 800","running","Resistencia a ritmo","12’ suave + técnica + 4 progresivos.","5x800m @4:35–4:45/km. Descanso 2’.","10’ suave + gemelo excéntrico.","Entreno clave del mes. Última serie igual o mejor que la primera.",[]);
+      add(list,"pro_w03_3","2026-05-28","Fuerza pico mes 1","strength","Alta carga sin fallo","6’ bike + movilidad + aproximaciones.","Básicos más pesados + sled + core.","Movilidad + descarga gemelo.","Alta carga, cero fallo muscular.",[{"name": "Sentadilla", "sets": "4", "reps": "4", "target": "65 kg", "rest": "2’30”", "notes": "RPE 8"}, {"name": "Peso muerto", "sets": "5", "reps": "3", "target": "90 kg", "rest": "3’", "notes": "Potente"}, {"name": "Press banca", "sets": "5", "reps": "5", "target": "32,5–35 kg", "rest": "90”", "notes": "Sólido"}, {"name": "Walking lunges", "sets": "3", "reps": "12/lad", "target": "12–16 kg", "rest": "75”", "notes": "Constante"}, {"name": "Sled push", "sets": "5", "reps": "20m", "target": "Medio/pesado", "rest": "75”", "notes": "No parar"}, {"name": "Farmer carry", "sets": "4", "reps": "30m", "target": "Pesado", "rest": "60”", "notes": "Agarre"}, {"name": "Plancha lateral", "sets": "3", "reps": "45”/lad", "target": "—", "rest": "45”", "notes": "Core"}]);
+      add(list,"pro_w03_4","2026-05-30","Running largo tempo","running","Bloque tempo controlado","5’ suave + movilidad.","8km: 3km suave + 4km @5:05–5:15/km + 1km suave.","Caminar 5’ + movilidad.","Aprende a correr incómodo sin romper ritmo.",[]);
+      add(list,"pro_w03_5","2026-05-31","Recovery opcional","optional","Descargar","5’ suave.","25’ muy suave @6:20–6:50/km o bici 30’.","Movilidad + foam roller.","Solo para soltar.",[]);
+      add(list,"pro_w04_1","2026-06-01","Hyrox descarga técnica","hyrox","Asimilar y mejorar técnica","8’ run + movilidad.","3 rondas suaves: 500m run @5:30/km + 400m Ski + 15 wall balls + 15m carry. Descanso 2’.","Movilidad + respiración.","Recuperar sistema. Nada de competir.",[]);
+      add(list,"pro_w04_2","2026-06-02","Running controlado · 1k","running","Mantener chispa sin fatiga","10’ suave + 3 progresivos.","3x1km @4:50–5:00/km. Descanso 2’30”.","10’ suave.","Control sin fatiga. Semana de descarga.",[]);
+      add(list,"pro_w04_3","2026-06-04","Fuerza descarga","strength","Mantener patrones","5’ bike + movilidad.","Básicos al 80% de la carga anterior + unilateral ligero.","Movilidad general.","Salir fresco.",[{"name": "Sentadilla", "sets": "3", "reps": "5", "target": "55–57,5 kg", "rest": "2’", "notes": "Técnica"}, {"name": "Peso muerto", "sets": "3", "reps": "4", "target": "75–80 kg", "rest": "2’", "notes": "Control"}, {"name": "Press banca", "sets": "3", "reps": "6", "target": "27,5–30 kg", "rest": "90”", "notes": "Ligero"}, {"name": "Split squat", "sets": "2", "reps": "8/lad", "target": "Ligero", "rest": "60”", "notes": "Movilidad"}, {"name": "Remo", "sets": "3", "reps": "10", "target": "Moderado", "rest": "60”", "notes": "Espalda"}, {"name": "Core suave", "sets": "3", "reps": "30”", "target": "—", "rest": "45”", "notes": "Activación"}]);
+      add(list,"pro_w04_4","2026-06-06","Running largo suave","running","Cerrar bloque fresco","5’ suave.","7km @6:00–6:20/km sin progresivo.","Movilidad + gemelo.","No apretar.",[]);
+      add(list,"pro_w04_5","2026-06-07","Descanso activo","optional","Recuperación","—","20–30’ paseo, movilidad o bici suave.","Movilidad suave.","Solo si te suma.",[]);
+      add(list,"pro_w05_1","2026-06-08","Hyrox umbral 4 bloques","hyrox","Umbral Hyrox y carrera bajo fatiga","10’ run suave + movilidad tobillo/cadera + activación 2 rondas: 10 squats, 10 lunges, 8 push ups.","4 bloques: 1km run @5:05–5:10/km + 750m SkiErg + 20 wall balls + 20m farmer carry. Descanso 2’.","6–8’ trote suave + movilidad.","Mes 2: sostener ritmos altos sin descontrolar.",[]);
+      add(list,"pro_w05_2","2026-06-09","Running umbral semana 5","running","Mejorar umbral y ritmo sostenido","12’ suave + técnica carrera + 3 progresivos.","4x1km @4:40–4:45/km. Descanso 2’.","10’ suave + gemelo excéntrico 3x12.","Respiración controlada. Mantener ritmo medio.",[]);
+      add(list,"pro_w05_3","2026-06-11","Fuerza específica semana 5","strength","Fuerza útil para Hyrox sin interferir","6’ bike + movilidad + aproximaciones.","Básicos + accesorios específicos según tabla.","Movilidad + descarga tobillo/cadera.","Fuerza útil, no culturismo. Evitar fallo.",[{"name": "Sentadilla", "sets": "5", "reps": "5", "target": "65 kg", "rest": "2’", "notes": "Volumen fuerza"}, {"name": "Peso muerto", "sets": "4", "reps": "3", "target": "90 kg", "rest": "2’", "notes": "Potente"}, {"name": "Press banca", "sets": "4", "reps": "5", "target": "35 kg", "rest": "90”", "notes": "Sólido"}, {"name": "Walking lunges", "sets": "3", "reps": "12/lad", "target": "Medio", "rest": "75”", "notes": "Transferencia"}, {"name": "Sled push", "sets": "4", "reps": "20m", "target": "Medio/pesado", "rest": "75”", "notes": "Empuje"}, {"name": "Farmer carry", "sets": "3", "reps": "40m", "target": "Pesado", "rest": "60”", "notes": "Agarre"}]);
+      add(list,"pro_w05_4","2026-06-13","Running largo semana 5","running","Base + final fuerte","6’ trote suave + movilidad.","9km: 6km @5:55–6:10/km + 3km @5:10–5:15/km.","Caminar 5’ + movilidad.","Clave para media maratón.",[]);
+      add(list,"pro_w05_5","2026-06-14","Opcional recuperación semana 5","optional","Recuperar y sumar base","5’ suave.","25–35’ Z2 o bici suave según sóleo.","Movilidad tobillo/cadera.","Si hay dolor, elige bici.",[]);
+      add(list,"pro_w06_1","2026-06-15","Hyrox densidad","hyrox","Umbral Hyrox y carrera bajo fatiga","10’ run suave + movilidad tobillo/cadera + activación 2 rondas: 10 squats, 10 lunges, 8 push ups.","5 bloques: 1km run @5:00–5:05/km + 500m Row + 20 lunges + 20 wall balls. Descanso 90”.","6–8’ trote suave + movilidad.","Mes 2: sostener ritmos altos sin descontrolar.",[]);
+      add(list,"pro_w06_2","2026-06-16","Running umbral semana 6","running","Mejorar umbral y ritmo sostenido","12’ suave + técnica carrera + 3 progresivos.","5x1km @4:35–4:40/km. Descanso 2’.","10’ suave + gemelo excéntrico 3x12.","Respiración controlada. Mantener ritmo medio.",[]);
+      add(list,"pro_w06_3","2026-06-18","Fuerza específica semana 6","strength","Fuerza útil para Hyrox sin interferir","6’ bike + movilidad + aproximaciones.","Básicos + accesorios específicos según tabla.","Movilidad + descarga tobillo/cadera.","Fuerza útil, no culturismo. Evitar fallo.",[{"name": "Sentadilla", "sets": "5", "reps": "5", "target": "67,5 kg", "rest": "2’", "notes": "Control"}, {"name": "Peso muerto", "sets": "4", "reps": "3", "target": "95 kg", "rest": "2’30”", "notes": "Sin fallo"}, {"name": "Press banca", "sets": "4", "reps": "5", "target": "37,5 kg", "rest": "90”", "notes": "Firme"}, {"name": "Step-up", "sets": "3", "reps": "10/lad", "target": "Medio", "rest": "75”", "notes": "Unilateral"}, {"name": "Sled push", "sets": "5", "reps": "20m", "target": "Medio/pesado", "rest": "75”", "notes": "Densidad"}, {"name": "Pallof press", "sets": "3", "reps": "12/lad", "target": "—", "rest": "45”", "notes": "Core"}]);
+      add(list,"pro_w06_4","2026-06-20","Running largo semana 6","running","Base + final fuerte","6’ trote suave + movilidad.","10km: 7km Z2 + 3km @5:05–5:10/km.","Caminar 5’ + movilidad.","Clave para media maratón.",[]);
+      add(list,"pro_w06_5","2026-06-21","Opcional recuperación semana 6","optional","Recuperar y sumar base","5’ suave.","25–35’ Z2 o bici suave según sóleo.","Movilidad tobillo/cadera.","Si hay dolor, elige bici.",[]);
+      add(list,"pro_w07_1","2026-06-22","Hyrox simulación larga","hyrox","Umbral Hyrox y carrera bajo fatiga","10’ run suave + movilidad tobillo/cadera + activación 2 rondas: 10 squats, 10 lunges, 8 push ups.","6 bloques: 1km run @5:00/km + alternar Ski / Row / Sled push-pull / Lunges / WB / Burpees. Descanso 75–90”.","6–8’ trote suave + movilidad.","Mes 2: sostener ritmos altos sin descontrolar.",[]);
+      add(list,"pro_w07_2","2026-06-23","Running umbral semana 7","running","Mejorar umbral y ritmo sostenido","12’ suave + técnica carrera + 3 progresivos.","6x800m @4:30–4:35/km. Descanso 2’.","10’ suave + gemelo excéntrico 3x12.","Respiración controlada. Mantener ritmo medio.",[]);
+      add(list,"pro_w07_3","2026-06-25","Fuerza específica semana 7","strength","Fuerza útil para Hyrox sin interferir","6’ bike + movilidad + aproximaciones.","Básicos + accesorios específicos según tabla.","Movilidad + descarga tobillo/cadera.","Fuerza útil, no culturismo. Evitar fallo.",[{"name": "Sentadilla", "sets": "4", "reps": "4", "target": "70 kg", "rest": "2’30”", "notes": "Alta carga"}, {"name": "Peso muerto", "sets": "5", "reps": "3", "target": "100 kg", "rest": "3’", "notes": "Potente"}, {"name": "Press banca", "sets": "5", "reps": "4", "target": "37,5–40 kg", "rest": "90”", "notes": "Sólido"}, {"name": "Walking lunges", "sets": "3", "reps": "12/lad", "target": "Pesado", "rest": "75”", "notes": "Control"}, {"name": "Sled push", "sets": "6", "reps": "20m", "target": "Pesado", "rest": "75”", "notes": "Pico"}, {"name": "Farmer carry", "sets": "4", "reps": "40m", "target": "Pesado", "rest": "60”", "notes": "Tronco"}]);
+      add(list,"pro_w07_4","2026-06-27","Running largo semana 7","running","Base + final fuerte","6’ trote suave + movilidad.","10–11km: 6km Z2 + 4km @5:00–5:05/km + 1km suave.","Caminar 5’ + movilidad.","Clave para media maratón.",[]);
+      add(list,"pro_w07_5","2026-06-28","Opcional recuperación semana 7","optional","Recuperar y sumar base","5’ suave.","25–35’ Z2 o bici suave según sóleo.","Movilidad tobillo/cadera.","Si hay dolor, elige bici.",[]);
+      add(list,"pro_w08_1","2026-06-29","Hyrox descarga","hyrox","Umbral Hyrox y carrera bajo fatiga","10’ run suave + movilidad tobillo/cadera + activación 2 rondas: 10 squats, 10 lunges, 8 push ups.","3 bloques suaves: 800m run @5:20–5:30/km + estaciones técnicas a baja carga. Descanso 2’.","6–8’ trote suave + movilidad.","Mes 2: sostener ritmos altos sin descontrolar.",[]);
+      add(list,"pro_w08_2","2026-06-30","Running umbral semana 8","running","Mejorar umbral y ritmo sostenido","12’ suave + técnica carrera + 3 progresivos.","3x1km @4:50/km. Descanso 2’30”.","10’ suave + gemelo excéntrico 3x12.","Respiración controlada. Mantener ritmo medio.",[]);
+      add(list,"pro_w08_3","2026-07-02","Fuerza específica semana 8","strength","Fuerza útil para Hyrox sin interferir","6’ bike + movilidad + aproximaciones.","Básicos + accesorios específicos según tabla.","Movilidad + descarga tobillo/cadera.","Fuerza útil, no culturismo. Evitar fallo.",[{"name": "Sentadilla", "sets": "3", "reps": "5", "target": "60 kg", "rest": "2’", "notes": "Descarga"}, {"name": "Peso muerto", "sets": "3", "reps": "4", "target": "85 kg", "rest": "2’", "notes": "Ligero"}, {"name": "Press banca", "sets": "3", "reps": "6", "target": "32,5 kg", "rest": "90”", "notes": "Control"}, {"name": "Unilateral ligero", "sets": "2", "reps": "10/lad", "target": "Ligero", "rest": "60”", "notes": "Movilidad"}, {"name": "Core", "sets": "2", "reps": "40”", "target": "—", "rest": "45”", "notes": "Suave"}]);
+      add(list,"pro_w08_4","2026-07-04","Running largo semana 8","running","Base + final fuerte","6’ trote suave + movilidad.","8–9km @5:50–6:10/km.","Caminar 5’ + movilidad.","Clave para media maratón.",[]);
+      add(list,"pro_w08_5","2026-07-05","Opcional recuperación semana 8","optional","Recuperar y sumar base","5’ suave.","25–35’ Z2 o bici suave según sóleo.","Movilidad tobillo/cadera.","Si hay dolor, elige bici.",[]);
+      add(list,"pro_w09_1","2026-07-06","Hyrox específico semana 9","hyrox","Correr cansado y mejorar transiciones","10–12’ run suave + movilidad + activación: 200m row, squats, lunges, push ups.","4 bloques: 1km run @5:00–5:05/km + 500m SkiErg + 20 wall balls + 20m carry + 10 burpees. Descanso 90”.","8’ suave + movilidad.","Mes específico: busca consistencia bajo fatiga.",[]);
+      add(list,"pro_w09_2","2026-07-07","Running calidad específico semana 9","running","Cambios de ritmo y velocidad sostenida","12’ suave + técnica + 4 progresivos.","4x(800m @4:35/km + 400m @4:20/km). Descanso 2’ entre bloques.","10’ suave + gemelo.","Entreno clave para sostener ritmo en Hyrox y 21K.",[]);
+      add(list,"pro_w09_3","2026-07-09","Fuerza mantenimiento semana 9","strength","Mantener fuerza sin bloquear piernas","6’ bike + movilidad + aproximaciones.","Básicos + accesorios según tabla.","Movilidad + respiración.","Reducir interferencia con running.",[{"name": "Sentadilla", "sets": "4", "reps": "4", "target": "67,5 kg", "rest": "2’", "notes": "Mantener"}, {"name": "Peso muerto", "sets": "4", "reps": "3", "target": "95 kg", "rest": "2’30”", "notes": "Potente"}, {"name": "Press banca", "sets": "4", "reps": "5", "target": "35–37,5 kg", "rest": "90”", "notes": "Control"}, {"name": "Walking lunges", "sets": "3", "reps": "12/lad", "target": "Medio", "rest": "75”", "notes": "Transferencia"}, {"name": "Sled push", "sets": "4", "reps": "20m", "target": "Medio", "rest": "75”", "notes": "Técnica"}, {"name": "Core antirotación", "sets": "3", "reps": "12/lad", "target": "—", "rest": "45”", "notes": "Core"}]);
+      add(list,"pro_w09_4","2026-07-11","Running largo específico semana 9","running","Volumen y tempo final","6’ suave.","10km: 6km @5:50–6:05/km + 3km @5:00–5:05/km + 1km suave.","Caminar + movilidad.","Base para media maratón.",[]);
+      add(list,"pro_w09_5","2026-07-12","Opcional recovery semana 9","optional","Recuperación activa","5’ movilidad.","20–30’ Z2 o bici + movilidad sóleo/tobillo.","Foam roller + respiración.","Prioriza recuperación.",[]);
+      add(list,"pro_w10_1","2026-07-13","Hyrox específico semana 10","hyrox","Correr cansado y mejorar transiciones","10–12’ run suave + movilidad + activación: 200m row, squats, lunges, push ups.","5 bloques: 1km run @4:55–5:00/km + 500m Row + 20 lunges + 20 wall balls. Descanso 75–90”.","8’ suave + movilidad.","Mes específico: busca consistencia bajo fatiga.",[]);
+      add(list,"pro_w10_2","2026-07-14","Running calidad específico semana 10","running","Cambios de ritmo y velocidad sostenida","12’ suave + técnica + 4 progresivos.","5x1km @4:30–4:35/km. Descanso 2’.","10’ suave + gemelo.","Entreno clave para sostener ritmo en Hyrox y 21K.",[]);
+      add(list,"pro_w10_3","2026-07-16","Fuerza mantenimiento semana 10","strength","Mantener fuerza sin bloquear piernas","6’ bike + movilidad + aproximaciones.","Básicos + accesorios según tabla.","Movilidad + respiración.","Reducir interferencia con running.",[{"name": "Sentadilla", "sets": "4", "reps": "4", "target": "70 kg", "rest": "2’30”", "notes": "Fuerte"}, {"name": "Peso muerto", "sets": "4", "reps": "3", "target": "100 kg", "rest": "3’", "notes": "Sin fallo"}, {"name": "Press banca", "sets": "4", "reps": "4", "target": "37,5–40 kg", "rest": "90”", "notes": "Firme"}, {"name": "Step-up", "sets": "3", "reps": "10/lad", "target": "Medio", "rest": "75”", "notes": "Unilateral"}, {"name": "Sled push", "sets": "5", "reps": "20m", "target": "Medio/pesado", "rest": "75”", "notes": "Denso"}, {"name": "Farmer carry", "sets": "3", "reps": "40m", "target": "Pesado", "rest": "60”", "notes": "Agarre"}]);
+      add(list,"pro_w10_4","2026-07-18","Running largo específico semana 10","running","Volumen y tempo final","6’ suave.","11km: 7km Z2 + 3km @4:55–5:00/km + 1km suave.","Caminar + movilidad.","Base para media maratón.",[]);
+      add(list,"pro_w10_5","2026-07-19","Opcional recovery semana 10","optional","Recuperación activa","5’ movilidad.","20–30’ Z2 o bici + movilidad sóleo/tobillo.","Foam roller + respiración.","Prioriza recuperación.",[]);
+      add(list,"pro_w11_1","2026-07-20","Hyrox específico semana 11","hyrox","Correr cansado y mejorar transiciones","10–12’ run suave + movilidad + activación: 200m row, squats, lunges, push ups.","6–7 bloques: 1km run @4:55–5:00/km + alternar Ski / Row / Sled push-pull / Lunges / WB / Burpees. Descanso 60–75”.","8’ suave + movilidad.","Mes específico: busca consistencia bajo fatiga.",[]);
+      add(list,"pro_w11_2","2026-07-21","Running calidad específico semana 11","running","Cambios de ritmo y velocidad sostenida","12’ suave + técnica + 4 progresivos.","6x800m @4:25–4:30/km. Descanso 2’.","10’ suave + gemelo.","Entreno clave para sostener ritmo en Hyrox y 21K.",[]);
+      add(list,"pro_w11_3","2026-07-23","Fuerza mantenimiento semana 11","strength","Mantener fuerza sin bloquear piernas","6’ bike + movilidad + aproximaciones.","Básicos + accesorios según tabla.","Movilidad + respiración.","Reducir interferencia con running.",[{"name": "Sentadilla", "sets": "3", "reps": "4", "target": "67,5 kg", "rest": "2’", "notes": "Reducir volumen"}, {"name": "Peso muerto", "sets": "4", "reps": "3", "target": "95 kg", "rest": "2’30”", "notes": "Control"}, {"name": "Press banca", "sets": "4", "reps": "4", "target": "35–37,5 kg", "rest": "90”", "notes": "Ligero"}, {"name": "Lunges", "sets": "3", "reps": "10/lad", "target": "Medio", "rest": "75”", "notes": "Sin destruir"}, {"name": "Core", "sets": "3", "reps": "Bloque", "target": "—", "rest": "45”", "notes": "Plancha + antirotación"}]);
+      add(list,"pro_w11_4","2026-07-25","Running largo específico semana 11","running","Volumen y tempo final","6’ suave.","12km: 7km Z2 + 4km @4:55/km + 1km suave.","Caminar + movilidad.","Base para media maratón.",[]);
+      add(list,"pro_w11_5","2026-07-26","Opcional recovery semana 11","optional","Recuperación activa","5’ movilidad.","20–30’ Z2 o bici + movilidad sóleo/tobillo.","Foam roller + respiración.","Prioriza recuperación.",[]);
+      add(list,"pro_w12_1","2026-07-27","Hyrox específico semana 12","hyrox","Correr cansado y mejorar transiciones","10–12’ run suave + movilidad + activación: 200m row, squats, lunges, push ups.","3–4 bloques suaves: 800m run @5:20–5:30/km + estaciones técnicas baja carga. Descanso 2’.","8’ suave + movilidad.","Mes específico: busca consistencia bajo fatiga.",[]);
+      add(list,"pro_w12_2","2026-07-28","Running calidad específico semana 12","running","Cambios de ritmo y velocidad sostenida","12’ suave + técnica + 4 progresivos.","3x1km @4:45–4:50/km. Descanso 2’30”.","10’ suave + gemelo.","Entreno clave para sostener ritmo en Hyrox y 21K.",[]);
+      add(list,"pro_w12_3","2026-07-30","Fuerza mantenimiento semana 12","strength","Mantener fuerza sin bloquear piernas","6’ bike + movilidad + aproximaciones.","Básicos + accesorios según tabla.","Movilidad + respiración.","Reducir interferencia con running.",[{"name": "Sentadilla", "sets": "3", "reps": "5", "target": "60–62,5 kg", "rest": "2’", "notes": "Descarga"}, {"name": "Peso muerto", "sets": "3", "reps": "4", "target": "85–90 kg", "rest": "2’", "notes": "Control"}, {"name": "Press banca", "sets": "3", "reps": "6", "target": "32,5 kg", "rest": "90”", "notes": "Ligero"}, {"name": "Unilateral ligero", "sets": "2", "reps": "10/lad", "target": "Ligero", "rest": "60”", "notes": "Movilidad"}, {"name": "Core suave", "sets": "2", "reps": "40”", "target": "—", "rest": "45”", "notes": "Suave"}]);
+      add(list,"pro_w12_4","2026-08-01","Running largo específico semana 12","running","Volumen y tempo final","6’ suave.","9–10km @5:50–6:10/km.","Caminar + movilidad.","Base para media maratón.",[]);
+      add(list,"pro_w12_5","2026-08-02","Opcional recovery semana 12","optional","Recuperación activa","5’ movilidad.","20–30’ Z2 o bici + movilidad sóleo/tobillo.","Foam roller + respiración.","Prioriza recuperación.",[]);
+      add(list,"pro_w13_1","2026-08-03","Hyrox afinado semana 13","hyrox","Mantener intensidad, reducir fatiga","8–10’ run suave + movilidad + activación corta.","4 bloques: 1km run @4:55–5:00/km + 500m Ski + 20 WB + 20m carry. Descanso 2’.","Movilidad + respiración.","Salir con ganas de más.",[]);
+      add(list,"pro_w13_2","2026-08-04","Running afinado semana 13","running","Chispa sin fatiga","10–12’ suave + 3 progresivos.","4x1km @4:30–4:35/km. Descanso 2’.","8–10’ suave.","Velocidad controlada. No buscar récord.",[]);
+      add(list,"pro_w13_3","2026-08-06","Fuerza activación semana 13","strength","Activar sin agujetas","5’ bike + movilidad.","Básicos ligeros + accesorios mínimos según tabla.","Movilidad.","Cero fatiga residual.",[{"name": "Sentadilla", "sets": "3", "reps": "4", "target": "65 kg", "rest": "2’", "notes": "Activar"}, {"name": "Peso muerto", "sets": "3", "reps": "3", "target": "90 kg", "rest": "2’", "notes": "Control"}, {"name": "Press banca", "sets": "3", "reps": "5", "target": "32,5 kg", "rest": "90”", "notes": "Fácil"}, {"name": "Lunges", "sets": "2", "reps": "10/lad", "target": "Ligero", "rest": "60”", "notes": "Activación"}, {"name": "Core", "sets": "2", "reps": "Bloque", "target": "—", "rest": "45”", "notes": "Suave"}]);
+      add(list,"pro_w13_4","2026-08-08","Running largo / competición semana 13","running","Afinado media maratón","5–10’ suave según sesión.","10km: 6km Z2 + 3km @5:00/km + 1km suave.","Movilidad + recuperación.","Mes 4: bajar volumen, mantener calidad.",[]);
+      add(list,"pro_w13_5","2026-08-09","Opcional movilidad semana 13","optional","Recuperación","—","20’ paseo o movilidad. Si hay competición, descanso total.","Respiración + movilidad.","Priorizar frescura.",[]);
+      add(list,"pro_w14_1","2026-08-10","Hyrox afinado semana 14","hyrox","Mantener intensidad, reducir fatiga","8–10’ run suave + movilidad + activación corta.","3 bloques: 1km run @4:55/km + estaciones ligeras. Descanso 2’.","Movilidad + respiración.","Salir con ganas de más.",[]);
+      add(list,"pro_w14_2","2026-08-11","Running afinado semana 14","running","Chispa sin fatiga","10–12’ suave + 3 progresivos.","3x1km @4:30/km. Descanso 2’.","8–10’ suave.","Velocidad controlada. No buscar récord.",[]);
+      add(list,"pro_w14_3","2026-08-13","Fuerza activación semana 14","strength","Activar sin agujetas","5’ bike + movilidad.","Básicos ligeros + accesorios mínimos según tabla.","Movilidad.","Cero fatiga residual.",[{"name": "Sentadilla", "sets": "3", "reps": "3", "target": "60 kg", "rest": "2’", "notes": "Ligero"}, {"name": "Peso muerto", "sets": "3", "reps": "3", "target": "85 kg", "rest": "2’", "notes": "Ligero"}, {"name": "Press banca", "sets": "3", "reps": "5", "target": "30 kg", "rest": "90”", "notes": "Control"}, {"name": "Trabajo unilateral", "sets": "2", "reps": "8/lad", "target": "Ligero", "rest": "60”", "notes": "Sin fatiga"}]);
+      add(list,"pro_w14_4","2026-08-15","Running largo / competición semana 14","running","Afinado media maratón","5–10’ suave según sesión.","8–9km Z2 @5:55–6:15/km.","Movilidad + recuperación.","Mes 4: bajar volumen, mantener calidad.",[]);
+      add(list,"pro_w14_5","2026-08-16","Opcional movilidad semana 14","optional","Recuperación","—","20’ paseo o movilidad. Si hay competición, descanso total.","Respiración + movilidad.","Priorizar frescura.",[]);
+      add(list,"pro_w15_1","2026-08-17","Hyrox afinado semana 15","hyrox","Mantener intensidad, reducir fatiga","8–10’ run suave + movilidad + activación corta.","2–3 bloques: 800m run @5:00/km + estaciones técnicas. Descanso amplio.","Movilidad + respiración.","Salir con ganas de más.",[]);
+      add(list,"pro_w15_2","2026-08-18","Running afinado semana 15","running","Chispa sin fatiga","10–12’ suave + 3 progresivos.","3x400m @4:15–4:20/km. Descanso 2’.","8–10’ suave.","Velocidad controlada. No buscar récord.",[]);
+      add(list,"pro_w15_3","2026-08-20","Fuerza activación semana 15","strength","Activar sin agujetas","5’ bike + movilidad.","Básicos ligeros + accesorios mínimos según tabla.","Movilidad.","Cero fatiga residual.",[{"name": "Sentadilla", "sets": "2", "reps": "3", "target": "Ligero", "rest": "2’", "notes": "Activar"}, {"name": "Peso muerto", "sets": "2", "reps": "3", "target": "Ligero", "rest": "2’", "notes": "Activar"}, {"name": "Core", "sets": "2", "reps": "30–40”", "target": "—", "rest": "45”", "notes": "Sin agujetas"}]);
+      add(list,"pro_w15_4","2026-08-22","Running largo / competición semana 15","running","Afinado media maratón","5–10’ suave según sesión.","6–7km muy suave @6:00–6:30/km.","Movilidad + recuperación.","Mes 4: bajar volumen, mantener calidad.",[]);
+      add(list,"pro_w15_5","2026-08-23","Opcional movilidad semana 15","optional","Recuperación","—","20’ paseo o movilidad. Si hay competición, descanso total.","Respiración + movilidad.","Priorizar frescura.",[]);
+      add(list,"pro_w16_1","2026-08-24","Hyrox afinado semana 16","hyrox","Mantener intensidad, reducir fatiga","8–10’ run suave + movilidad + activación corta.","2 rondas suaves: 500m run + 10 WB + 10 burpees. Sin fatiga.","Movilidad + respiración.","Salir con ganas de más.",[]);
+      add(list,"pro_w16_2","2026-08-25","Running afinado semana 16","running","Chispa sin fatiga","10–12’ suave + 3 progresivos.","4km suave + 3 progresivos de 20”.","8–10’ suave.","Velocidad controlada. No buscar récord.",[]);
+      add(list,"pro_w16_3","2026-08-27","Fuerza activación semana 16","strength","Activar sin agujetas","5’ bike + movilidad.","Básicos ligeros + accesorios mínimos según tabla.","Movilidad.","Cero fatiga residual.",[]);
+      add(list,"pro_w16_4","2026-08-29","Running largo / competición semana 16","running","Afinado media maratón","5–10’ suave según sesión.","Competición / Media maratón: calentamiento 10–15’, salida controlada, ritmo objetivo 5:00–5:15/km.","Movilidad + recuperación.","Mes 4: bajar volumen, mantener calidad.",[]);
+      add(list,"pro_w16_5","2026-08-30","Opcional movilidad semana 16","optional","Recuperación","—","20’ paseo o movilidad. Si hay competición, descanso total.","Respiración + movilidad.","Priorizar frescura.",[]);
+      return list;
+    }
+
+    function init(){
+      const savedLayout = localStorage.getItem(STORAGE_KEY);
+      if(savedLayout){
+        try {
+          const parsed = JSON.parse(savedLayout);
+          sessions = sessions.map(s => ({...s, ...(parsed.find(x => x.id === s.id) || {})}));
+        } catch(e) {}
+      }
+      const monthSelect = document.getElementById('monthSelect');
+      monthSelect.innerHTML = months.map(m => `<option value="${m.id}">${m.label}</option>`).join('');
+      monthSelect.value = '2026-05';
+      monthSelect.addEventListener('change', renderCalendar);
+      renderCalendar();
+      updateReadiness();
+    }
+
+    function renderCalendar(){
+      const monthId = document.getElementById('monthSelect').value;
+      const m = months.find(x => x.id === monthId);
+      document.getElementById('monthTitle').textContent = m.label;
+      document.getElementById('monthMeta').textContent = 'Vista mensual · drag & drop activo';
+      const grid = document.getElementById('monthGrid');
+      grid.innerHTML = '';
+
+      const first = new Date(m.year, m.monthIndex, 1);
+      const startOffset = (first.getDay() + 6) % 7;
+      const start = new Date(m.year, m.monthIndex, 1 - startOffset);
+      const today = new Date();
+
+      for(let i=0; i<42; i++){
+        const d = new Date(start);
+        d.setDate(start.getDate() + i);
+        const iso = toISO(d);
+        const daySessions = sessions.filter(s => s.date === iso);
+        const day = document.createElement('div');
+        day.className = 'day' + (d.getMonth() !== m.monthIndex ? ' other-month' : '') + (isSameDay(d,today) ? ' today' : '');
+        day.dataset.date = iso;
+        day.ondragover = allowDrop;
+        day.ondragleave = ev => ev.currentTarget.classList.remove('drop-hover');
+        day.ondrop = dropSession;
+        const summary = buildDaySummary(daySessions);
+        day.innerHTML = `<div class="day-top"><span class="date-num">${d.getDate()}</span><div class="day-actions"><span class="tag">${shortMonth(d)}</span>${d.getMonth() === m.monthIndex ? `<button class="day-add" onclick="openNewSessionModal('${iso}')">+</button>` : ''}</div></div>${summary}`;
+        daySessions.forEach(session => day.appendChild(sessionCard(session)));
+        if(daySessions.length === 0 && d.getMonth() === m.monthIndex){
+          const rest = document.createElement('span');
+          rest.className = 'rest-label';
+          rest.textContent = 'Descanso';
+          day.appendChild(rest);
+        }
+        grid.appendChild(day);
+      }
+      updateMonthStats(monthId);
+    }
+
+    function sessionCard(session){
+      const data = sessionData[session.id] || {};
+      const status = data.status || session.status || 'Pendiente';
+      const div = document.createElement('div');
+      div.className = `session ${session.type} status-${status.toLowerCase()}`;
+      div.draggable = true;
+      div.dataset.id = session.id;
+      div.ondragstart = dragSession;
+      div.onclick = () => openModal(session.id);
+      div.innerHTML = `<span class="session-title">${escapeHtml(data.title || session.title)}</span><span class="session-goal">${escapeHtml(data.goal || session.goal)}</span><div class="tag-row"><span class="tag">${labelType(session.type)}</span><span class="tag status">${status}</span></div><div class="session-mini-actions"><button class="mini-btn" onclick="event.stopPropagation(); openDuplicateModal('${session.id}')">Duplicar</button></div>`;
+      return div;
+    }
+
+    function buildDaySummary(daySessions){
+      if(!daySessions.length) return '';
+      const counts = daySessions.reduce((acc,s)=>{ acc[s.type]=(acc[s.type]||0)+1; return acc; },{});
+      return `<div class="day-summary">${Object.entries(counts).map(([type,count])=>`<span class="dot-pill ${type}">${labelType(type)}${count>1 ? ' x'+count : ''}</span>`).join('')}</div>`;
+    }
+
+    function deleteCurrentSession(){
+      if(!currentSessionId) return;
+      deleteSessionById(currentSessionId);
+    }
+
+    function deleteSessionById(id){
+      const s = getSession(id);
+      if(!s) return;
+      if(!confirm(`¿Borrar "${s.title}"? Esta acción eliminará la sesión del calendario.`)) return;
+
+      if(!s.custom) saveDeletedSession(id);
+      sessions = sessions.filter(item => item.id !== id);
+      delete sessionData[id];
+      localStorage.setItem(SESSION_DATA_KEY, JSON.stringify(sessionData));
+      saveCustomSessions();
+      saveLayout();
+
+      if(currentSessionId === id) closeModal();
+      renderCalendar();
+    }
+
+    function allowDrop(ev){ ev.preventDefault(); ev.currentTarget.classList.add('drop-hover'); }
+    function dragSession(ev){ ev.dataTransfer.setData('text/plain', ev.currentTarget.dataset.id); }
+    function dropSession(ev){
+      ev.preventDefault();
+      ev.currentTarget.classList.remove('drop-hover');
+      const id = ev.dataTransfer.getData('text/plain');
+      const session = sessions.find(s => s.id === id);
+      if(session){ session.date = ev.currentTarget.dataset.date; saveLayout(); saveCustomSessions(); renderCalendar(); }
+    }
+
+    function openModal(id){
+      currentSessionId = id;
+      editMode = false;
+      const s = getSession(id);
+      const data = sessionData[id] || {};
+      const view = mergedSession(s,data);
+      document.getElementById('modalTitle').textContent = view.title;
+      document.getElementById('modalGoal').textContent = view.goal;
+      document.getElementById('modalTags').innerHTML = `<span class="tag">${labelType(s.type)}</span><span class="tag">${view.status || 'Pendiente'}</span><span class="tag">${formatDate(s.date)}</span>`;
+      fillView(view);
+      fillEdit(view);
+      fillLogs(data);
+      renderStrength(s, data);
+      updateCopyBox();
+      setEdit(false);
+      const modalCard = document.querySelector('#modal .modal-card');
+      if(modalCard) modalCard.className = 'modal-card session-' + s.type;
+      document.getElementById('modal').classList.add('open');
+    }
+
+    function fillView(v){
+      document.getElementById('vGoal').textContent = v.goal;
+      document.getElementById('vStatus').textContent = v.status || 'Pendiente';
+      document.getElementById('vWarm').textContent = v.warm;
+      document.getElementById('vMain').textContent = v.main;
+      document.getElementById('vCool').textContent = v.cool;
+      document.getElementById('vNote').textContent = v.note;
+    }
+
+    function fillEdit(v){
+      document.getElementById('eStatus').value = v.status || 'Pendiente';
+      document.getElementById('eTitle').value = v.title;
+      document.getElementById('eGoal').value = v.goal;
+      document.getElementById('eWarm').value = v.warm;
+      document.getElementById('eMain').value = v.main;
+      document.getElementById('eCool').value = v.cool;
+      document.getElementById('eNote').value = v.note;
+    }
+
+
+    const logSchemas = {
+      running: {
+        title: 'Registro de running',
+        subtitle: 'Datos de carrera: distancia, ritmo, pulso, terreno y sensaciones.',
+        fields: [
+          ['distance','Distancia','Ej: 8 km'],
+          ['time','Tiempo total','Ej: 42:30'],
+          ['pace','Ritmo medio','Ej: 5:18/km'],
+          ['hravg','FC media','Ej: 156'],
+          ['hrmax','FC máxima','Ej: 181'],
+          ['elevation','Desnivel','Ej: +85 m'],
+          ['surface','Superficie','Asfalto / cinta / pista / trail']
+        ]
+      },
+      hyrox: {
+        title: 'Registro Hyrox',
+        subtitle: 'Ritmo, estaciones, transiciones y fatiga específica.',
+        fields: [
+          ['time','Duración total','Ej: 58:20'],
+          ['blocks','Bloques/rondas completadas','Ej: 5 rondas'],
+          ['runpace','Ritmo medio carrera','Ej: 5:05/km'],
+          ['hardest','Estación más dura','Ej: Sled push'],
+          ['best','Estación mejor','Ej: Row'],
+          ['transitions','Transiciones','Buenas / lentas / caóticas'],
+          ['tactic','Nota táctica','Qué haría diferente']
+        ]
+      },
+      strength: {
+        title: 'Registro de fuerza',
+        subtitle: 'Pesos reales, reps, fatiga muscular y molestias. La tabla de fuerza es el registro principal.',
+        fields: [
+          ['time','Duración total','Ej: 62 min'],
+          ['musclefatigue','Fatiga muscular','Baja / media / alta'],
+          ['bestexercise','Ejercicio que mejor salió','Ej: sentadilla'],
+          ['reviewexercise','Ejercicio a revisar','Ej: lunges'],
+          ['discomfort','Molestias','Zona / intensidad'],
+          ['energy','Energía en sala','Alta / media / baja']
+        ]
+      },
+      optional: {
+        title: 'Registro recovery',
+        subtitle: 'Controla si la sesión suave te ayuda a recuperar o suma fatiga.',
+        fields: [
+          ['time','Duración','Ej: 25 min'],
+          ['recoverytype','Tipo','Caminar / bici / movilidad / trote'],
+          ['before','Sensación antes','Ej: cargado'],
+          ['after','Sensación después','Ej: más suelto'],
+          ['mobility','Movilidad realizada','Ej: tobillo + cadera']
+        ]
+      },
+      race: {
+        title: 'Registro competición',
+        subtitle: 'Resultado, estrategia, errores y aprendizajes.',
+        fields: [
+          ['officialtime','Tiempo oficial','Ej: 1:12:34'],
+          ['position','Resultado/posición','Ej: 24/120'],
+          ['splits','Splits','Km / estaciones / parciales'],
+          ['worked','Qué funcionó','Estrategia, pacing, pareja...'],
+          ['errors','Errores','Qué evitar la próxima vez'],
+          ['learning','Aprendizaje principal','Conclusión clave']
+        ]
+      }
+    };
+
+    function getLogSchema(type){
+      return logSchemas[type] || logSchemas.running;
+    }
+
+    function renderDynamicLogFields(type, log){
+      const schema = getLogSchema(type);
+      const title = document.getElementById('logTitle');
+      const subtitle = document.getElementById('logSubtitle');
+      const box = document.getElementById('dynamicLogFields');
+      if(!title || !subtitle || !box) return;
+      title.textContent = schema.title;
+      subtitle.textContent = schema.subtitle;
+      box.innerHTML = `<div class="form-grid">${
+        schema.fields.map(([key,label,ph]) => `<div><label>${label}</label><input id="dyn_${key}" data-log-key="${key}" placeholder="${ph || ''}" value="${escapeAttr((log && log[key]) || '')}"></div>`).join('')
+      }</div>`;
+    }
+
+    function renderRpeButtons(value){
+      const box = document.getElementById('rpeButtons');
+      if(!box) return;
+      const current = String(value || '');
+      box.innerHTML = Array.from({length:10},(_,i)=>{
+        const n = i + 1;
+        const cls = n <= 3 ? 'low' : n <= 7 ? 'mid' : 'high';
+        return `<button type="button" class="rpe-btn ${cls} ${current === String(n) ? 'selected' : ''}" onclick="setRpe(${n})">${n}</button>`;
+      }).join('');
+    }
+
+    function setRpe(n){
+      const input = document.getElementById('logRpe');
+      if(input) input.value = n;
+      renderRpeButtons(n);
+      updateSessionReading();
+    }
+
+    function setQuickFeel(value){
+      const input = document.getElementById('logFeel');
+      if(input) input.value = value;
+      document.querySelectorAll('.quick-chip').forEach(btn => btn.classList.toggle('active', btn.textContent === value));
+      updateSessionReading();
+    }
+
+    function collectDynamicLog(){
+      const data = {};
+      document.querySelectorAll('[data-log-key]').forEach(input => {
+        data[input.dataset.logKey] = input.value;
+      });
+      return data;
+    }
+
+    function updateSessionReading(){
+      const rpe = parseFloat(document.getElementById('logRpe')?.value || 0);
+      const pain = parseFloat(document.getElementById('logPain')?.value || 0);
+      const feel = document.getElementById('logFeel')?.value || '';
+      const box = document.getElementById('sessionReading');
+      if(!box) return;
+      let text = 'Completa RPE, dolor y sensaciones para generar una lectura rápida.';
+      if(rpe || pain || feel){
+        if(pain >= 5) text = 'Dolor elevado. La siguiente sesión debería reducir impacto, evitar cuestas/series y priorizar movilidad o Z2 suave.';
+        else if(rpe >= 8) text = 'Sesión exigente. Mantén la calidad, pero revisa recuperación antes del próximo estímulo intenso.';
+        else if(rpe >= 6) text = 'Carga moderada-controlada. Buena zona para progresar si las molestias se mantienen bajas.';
+        else text = 'Sesión suave. Puede servir como recuperación o acumulación de base sin fatiga relevante.';
+        if(feel) text += ` Sensación registrada: ${feel}.`;
+      }
+      box.innerHTML = `<strong>Lectura del entreno:</strong><span>${text}</span>`;
+    }
+
+
+    function fillLogs(data){
+      const s = getSession(currentSessionId);
+      const log = data.log || {};
+      renderDynamicLogFields(s.type, log);
+      renderRpeButtons(log.rpe || '');
+      const rpeInput = document.getElementById('logRpe');
+      if(rpeInput) rpeInput.value = log.rpe || '';
+      document.getElementById('logPain').value = log.pain || '';
+      document.getElementById('logFeel').value = log.feel || '';
+      document.getElementById('logNotes').value = log.notes || '';
+      document.querySelectorAll('.quick-chip').forEach(btn => btn.classList.toggle('active', btn.textContent === (log.feel || '')));
+      const adaptationBox = document.getElementById('rafikiAdaptation');
+      if(adaptationBox) adaptationBox.value = data.rafikiAdaptation || '';
+      renderImages(data.images || []);
+      setTimeout(updateSessionReading, 0);
+    }
+
+    function renderStrength(session, data){
+      const block = document.getElementById('strengthBlock');
+      const table = document.getElementById('strengthTable');
+      const exercises = data.strength || session.strength || [];
+      if(session.type !== 'strength' && exercises.length === 0){ block.classList.add('hidden'); return; }
+      block.classList.remove('hidden');
+      table.innerHTML = `<thead><tr><th>OK</th><th>Ejercicio</th><th>Series</th><th>Reps</th><th>Peso objetivo</th><th>Descanso</th><th>Peso real</th><th>Notas</th></tr></thead><tbody>${exercises.map((e,i)=>`
+        <tr>
+          <td><input type="checkbox" data-st="done" data-i="${i}" ${e.done ? 'checked' : ''}></td>
+          <td>${escapeHtml(e.name)}</td>
+          <td>${escapeHtml(e.sets || '')}</td>
+          <td>${escapeHtml(e.reps || '')}</td>
+          <td>${escapeHtml(e.target || '')}</td>
+          <td>${escapeHtml(e.rest || '')}</td>
+          <td><input data-st="real" data-i="${i}" value="${escapeAttr(e.real || '')}" placeholder="kg"></td>
+          <td><input data-st="notes" data-i="${i}" value="${escapeAttr(e.notes || '')}" placeholder="Notas"></td>
+        </tr>`).join('')}</tbody>`;
+    }
+
+    function toggleEdit(){ setEdit(!editMode); }
+    function setEdit(value){
+      editMode = value;
+      document.getElementById('viewMode').classList.toggle('hidden', value);
+      document.getElementById('editMode').classList.toggle('hidden', !value);
+      document.getElementById('editBtn').textContent = value ? 'Ver entreno' : 'Editar entreno';
+    }
+
+    function applyRafikiAdaptation(){
+      if(!currentSessionId) return;
+      const adaptation = document.getElementById('rafikiAdaptation').value.trim();
+      if(!adaptation){ alert('Pega primero la adaptación de Rafiki.'); return; }
+      const id = currentSessionId;
+      const s = getSession(id);
+      const current = sessionData[id] || {};
+      sessionData[id] = {
+        ...current,
+        originalMain: current.originalMain || s.main,
+        main: adaptation,
+        status: 'Adaptado',
+        rafikiAdaptation: adaptation,
+        adaptedAt: new Date().toISOString()
+      };
+      localStorage.setItem(SESSION_DATA_KEY, JSON.stringify(sessionData));
+      openModal(id);
+      renderCalendar();
+    }
+
+    function restoreOriginalSession(){
+      if(!currentSessionId) return;
+      const id = currentSessionId;
+      const current = sessionData[id] || {};
+      const original = current.originalMain || getSession(id).main;
+      sessionData[id] = { ...current, main: original, status: 'Pendiente', rafikiAdaptation: '' };
+      localStorage.setItem(SESSION_DATA_KEY, JSON.stringify(sessionData));
+      openModal(id);
+      renderCalendar();
+    }
+
+    function saveSession(){
+      const id = currentSessionId;
+      const current = sessionData[id] || {};
+      const log = {
+        ...collectDynamicLog(),
+        rpe: document.getElementById('logRpe')?.value || '',
+        pain: document.getElementById('logPain').value,
+        feel: document.getElementById('logFeel').value,
+        notes: document.getElementById('logNotes').value
+      };
+      const baseExercises = current.strength || getSession(id).strength || [];
+      const strength = [...document.querySelectorAll('#strengthTable tbody tr')].map((tr,i)=>{
+        const base = baseExercises[i] || {};
+        return {
+          ...base,
+          done: tr.querySelector('[data-st="done"]').checked,
+          real: tr.querySelector('[data-st="real"]').value,
+          notes: tr.querySelector('[data-st="notes"]').value
+        };
+      });
+      sessionData[id] = {
+        ...current,
+        status: document.getElementById('eStatus').value,
+        title: document.getElementById('eTitle').value,
+        goal: document.getElementById('eGoal').value,
+        warm: document.getElementById('eWarm').value,
+        main: document.getElementById('eMain').value,
+        cool: document.getElementById('eCool').value,
+        note: document.getElementById('eNote').value,
+        log,
+        strength,
+        rafikiAdaptation: document.getElementById('rafikiAdaptation').value,
+        images: current.images || []
+      };
+      localStorage.setItem(SESSION_DATA_KEY, JSON.stringify(sessionData));
+      updateCopyBox();
+      openModal(id);
+      renderCalendar();
+    }
+
+    function handleImages(event){
+      const files = [...event.target.files];
+      const id = currentSessionId;
+      const current = sessionData[id] || {};
+      current.images = current.images || [];
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          current.images.push(e.target.result);
+          sessionData[id] = current;
+          localStorage.setItem(SESSION_DATA_KEY, JSON.stringify(sessionData));
+          renderImages(current.images);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function renderImages(images){
+      document.getElementById('imagePreview').innerHTML = images.map(src => `<img src="${src}" alt="captura entrenamiento">`).join('');
+    }
+
+    function updateReadiness(){
+      const sleepEl = document.getElementById('rSleep');
+      const bioEl = document.getElementById('rBio');
+      const stressEl = document.getElementById('rStress');
+      const fatigueEl = document.getElementById('rFatigue');
+      const box = document.getElementById('readinessBox');
+      if(!sleepEl || !bioEl || !stressEl || !fatigueEl || !box) return;
+
+      const sleep = parseFloat(sleepEl.value || 0);
+      const bio = parseFloat(bioEl.value || 0);
+      const stress = parseFloat(stressEl.value || 0);
+      const fatigue = parseFloat(fatigueEl.value || 0);
+      let cls = '', text = 'Introduce tus datos.';
+      if(sleep || bio || stress || fatigue){
+        let score = 0;
+        if(sleep >= 7) score += 2; else if(sleep >= 6) score += 1; else score -= 1;
+        if(bio >= 70) score += 2; else if(bio >= 50) score += 1; else if(bio > 0) score -= 1;
+        if(stress >= 8) score -= 2; else if(stress >= 6) score -= 1; else if(stress > 0) score += 1;
+        if(fatigue >= 8) score -= 2; else if(fatigue >= 6) score -= 1; else if(fatigue > 0) score += 1;
+        if(score >= 4){ cls = 'green'; text = 'Verde: entrenar normal. Mantén el plan previsto.'; }
+        else if(score >= 1){ cls = 'yellow'; text = 'Amarillo: reduce un 15–25% el volumen o baja un punto la intensidad.'; }
+        else { cls = 'red'; text = 'Rojo: cambia por recovery, bici suave o movilidad. No fuerces running intenso.'; }
+      }
+      box.className = 'readiness ' + cls;
+      box.innerHTML = `<strong>Recomendación:</strong> ${text}`;
+    }
+
+    function updateCopyBox(){
+      if(!currentSessionId) return '';
+      const s = getSession(currentSessionId);
+      const d = sessionData[currentSessionId] || {};
+      const v = mergedSession(s,d);
+      const log = d.log || {};
+      const recovery = `Sueño: ${document.getElementById('rSleep')?.value || '-'}h | Biocharge: ${document.getElementById('rBio')?.value || '-'} | Estrés: ${document.getElementById('rStress')?.value || '-'} | Fatiga: ${document.getElementById('rFatigue')?.value || '-'}`;
+      const logLines = Object.entries(log).filter(([k,v]) => v).map(([k,v]) => `${k}: ${v}`).join('\n') || '-';
+      const txt = `Entreno: ${v.title}
+Fecha: ${formatDate(s.date)}
+Tipo: ${labelType(s.type)}
+Estado: ${v.status || 'Pendiente'}
+Objetivo: ${v.goal}
+
+Datos recovery:
+${recovery}
+
+Registro post-entreno:
+${logLines}
+
+Necesito que me ayudes a adaptar el siguiente entreno según estos datos.`;
+      document.getElementById('copyBox').textContent = txt;
+      return txt;
+    }
+
+    function copySessionSummary(){
+      saveSession();
+      const txt = updateCopyBox();
+      navigator.clipboard?.writeText(txt);
+    }
+
+    function copyWeekSummary(){
+      const monthId = document.getElementById('monthSelect').value;
+      const monthSessions = sessions.filter(s => s.date.startsWith(monthId));
+      const txt = monthSessions.map(s => `${formatDate(s.date)} · ${s.title} · ${s.goal}`).join('\n');
+      navigator.clipboard?.writeText(txt);
+    }
+
+    function openWeeklyReview(){
+      const monthId = document.getElementById('monthSelect').value;
+      const arr = sessions.filter(s => s.date.startsWith(monthId));
+      const completed = arr.filter(s => (sessionData[s.id]?.status || s.status) === 'Completado').length;
+      const adapted = arr.filter(s => (sessionData[s.id]?.status || s.status) === 'Adaptado').length;
+      const running = arr.filter(s => s.type === 'running');
+      const logs = arr.map(s => sessionData[s.id]?.log).filter(Boolean);
+      const km = logs.reduce((sum,l)=> sum + (parseFloat(String(l.distance||'').replace(',','.')) || 0), 0);
+      const rpes = logs.map(l => parseFloat(l.rpe)).filter(n => !isNaN(n));
+      const pains = logs.map(l => parseFloat(l.pain)).filter(n => !isNaN(n));
+      const avgRpe = rpes.length ? (rpes.reduce((a,b)=>a+b,0)/rpes.length).toFixed(1) : '-';
+      const avgPain = pains.length ? (pains.reduce((a,b)=>a+b,0)/pains.length).toFixed(1) : '-';
+      const maxPain = pains.length ? Math.max(...pains) : '-';
+      let advice = 'Semana estable. Mantener estructura y seguir registrando datos.';
+      if(maxPain !== '-' && maxPain >= 5) advice = 'Atención: dolor alto registrado. Priorizar Z2, reducir impacto y revisar series/cuestas.';
+      else if(avgRpe !== '-' && avgRpe >= 8) advice = 'Carga percibida alta. Mantener calidad, pero reducir volumen accesorio.';
+      else if(completed < Math.max(2, arr.length * .45)) advice = 'Baja adherencia esta semana. Simplificar: running calidad + running base + fuerza express.';
+
+      document.getElementById('wrSessions').textContent = `${completed}/${arr.length} completadas · ${adapted} adaptadas`;
+      document.getElementById('wrRunning').textContent = `${running.length} sesiones running previstas · ${km ? km.toFixed(1) : '-'} km registrados`;
+      document.getElementById('wrBody').textContent = `RPE medio: ${avgRpe} · Dolor medio: ${avgPain} · Dolor máximo: ${maxPain}`;
+      document.getElementById('wrAdvice').textContent = advice;
+
+      const key = 'weekly_review_' + monthId;
+      const saved = JSON.parse(localStorage.getItem(key) || '{}');
+      document.getElementById('weeklyNotes').value = saved.notes || '';
+      document.getElementById('weeklyAdjustments').value = saved.adjustments || '';
+      updateWeeklyCopyBox();
+      document.getElementById('weeklyModal').classList.add('open');
+    }
+
+    function closeWeeklyReview(){ document.getElementById('weeklyModal').classList.remove('open'); }
+
+    function updateWeeklyCopyBox(){
+      const txt = `Resumen semanal
+${document.getElementById('wrSessions').textContent}
+${document.getElementById('wrRunning').textContent}
+${document.getElementById('wrBody').textContent}
+
+Recomendación automática:
+${document.getElementById('wrAdvice').textContent}
+
+Notas:
+${document.getElementById('weeklyNotes').value || '-'}
+
+Adaptaciones futuras:
+${document.getElementById('weeklyAdjustments').value || '-'}
+
+Rafiki, ayúdame a ajustar la próxima semana según esta revisión.`;
+      document.getElementById('weeklyCopyBox').textContent = txt;
+      return txt;
+    }
+
+    function saveWeeklyReview(){
+      const monthId = document.getElementById('monthSelect').value;
+      localStorage.setItem('weekly_review_' + monthId, JSON.stringify({
+        notes: document.getElementById('weeklyNotes').value,
+        adjustments: document.getElementById('weeklyAdjustments').value,
+        savedAt: new Date().toISOString()
+      }));
+      updateWeeklyCopyBox();
+    }
+
+    function copyWeeklyReview(){
+      saveWeeklyReview();
+      const txt = updateWeeklyCopyBox();
+      navigator.clipboard?.writeText(txt);
+    }
+
+    document.addEventListener('input', (e)=>{
+      if(e.target && (e.target.id === 'weeklyNotes' || e.target.id === 'weeklyAdjustments')) updateWeeklyCopyBox();
+    });
+
+    let sessionFormMode = 'new';
+    let duplicateSourceId = null;
+
+    function toggleMoreMenu(){
+      document.getElementById('moreMenu').classList.toggle('open');
+    }
+
+    function toggleInfoPanel(){
+      const panel = document.getElementById('infoPanel');
+      const chevron = document.getElementById('infoChevron');
+      if(!panel) return;
+      panel.classList.toggle('open');
+      if(chevron) chevron.textContent = panel.classList.contains('open') ? '−' : '＋';
+    }
+
+    function closeMoreMenu(){
+      document.getElementById('moreMenu').classList.remove('open');
+    }
+
+    function openNewSessionModal(dateOverride=null){
+      closeMoreMenu();
+      sessionFormMode = 'new';
+      duplicateSourceId = null;
+      document.getElementById('sessionFormTitle').textContent = 'Nueva sesión';
+      const monthId = document.getElementById('monthSelect').value;
+      const defaultDate = dateOverride || (monthId + '-01');
+      fillSessionForm({
+        date: defaultDate,
+        type: 'running',
+        title: '',
+        goal: '',
+        warm: '',
+        main: '',
+        cool: '',
+        note: '',
+        strength: []
+      });
+      document.getElementById('sessionFormModal').classList.add('open');
+    }
+
+    function openDuplicateModal(id=null){
+      const sourceId = id || currentSessionId;
+      if(!sourceId) return;
+      sessionFormMode = 'duplicate';
+      duplicateSourceId = sourceId;
+      const base = getSession(sourceId);
+      const source = mergedSession(base, sessionData[sourceId] || {});
+      document.getElementById('sessionFormTitle').textContent = 'Duplicar sesión';
+      fillSessionForm({
+        ...source,
+        date: base.date,
+        title: source.title + ' (copia)',
+        strength: (sessionData[sourceId]?.strength || base.strength || [])
+      });
+      document.getElementById('sessionFormModal').classList.add('open');
+    }
+
+    function closeSessionFormModal(){
+      document.getElementById('sessionFormModal').classList.remove('open');
+    }
+
+    function fillSessionForm(s){
+      document.getElementById('nfDate').value = s.date || '';
+      document.getElementById('nfType').value = s.type || 'running';
+      document.getElementById('nfTitle').value = s.title || '';
+      document.getElementById('nfGoal').value = s.goal || '';
+      document.getElementById('nfWarm').value = s.warm || '';
+      document.getElementById('nfMain').value = s.main || '';
+      document.getElementById('nfCool').value = s.cool || '';
+      document.getElementById('nfNote').value = s.note || '';
+      document.getElementById('nfStrength').value = (s.strength || []).map(e => [e.name, e.sets, e.reps, e.target, e.rest, e.notes].join(' | ')).join('\n');
+    }
+
+    function parseStrengthText(text){
+      return text.split('\n').map(line => line.trim()).filter(Boolean).map(line => {
+        const parts = line.split('|').map(p => p.trim());
+        return ex(parts[0] || 'Ejercicio', parts[1] || '', parts[2] || '', parts[3] || '', parts[4] || '', parts[5] || '');
+      });
+    }
+
+    function saveNewOrDuplicatedSession(){
+      const date = document.getElementById('nfDate').value;
+      const type = document.getElementById('nfType').value;
+      const title = document.getElementById('nfTitle').value.trim();
+      if(!date || !title){
+        alert('Completa al menos fecha y título.');
+        return;
+      }
+
+      const newSession = {
+        id: generateId(sessionFormMode === 'duplicate' ? 'dup' : 'custom'),
+        custom: true,
+        sourceId: duplicateSourceId || null,
+        date,
+        type,
+        title,
+        goal: document.getElementById('nfGoal').value.trim(),
+        warm: document.getElementById('nfWarm').value.trim(),
+        main: document.getElementById('nfMain').value.trim(),
+        cool: document.getElementById('nfCool').value.trim(),
+        note: document.getElementById('nfNote').value.trim(),
+        status: 'Pendiente',
+        strength: parseStrengthText(document.getElementById('nfStrength').value)
+      };
+
+      sessions.push(newSession);
+      saveCustomSessions();
+      saveLayout();
+      closeSessionFormModal();
+      const monthId = date.slice(0,7);
+      if(months.some(m => m.id === monthId)){
+        document.getElementById('monthSelect').value = monthId;
+      }
+      renderCalendar();
+      alert(sessionFormMode === 'duplicate' ? 'Sesión duplicada correctamente.' : 'Sesión creada correctamente.');
+    }
+
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('moreMenu');
+      const controls = document.querySelector('.controls-wrap');
+      if(menu && controls && !controls.contains(e.target)) menu.classList.remove('open');
+    });
+
+    function collectWeeklyReviews(){
+      const reviews = {};
+      Object.keys(localStorage).forEach(key => {
+        if(key.startsWith('weekly_review_')) reviews[key] = localStorage.getItem(key);
+      });
+      return reviews;
+    }
+
+    function exportData(){
+      saveLayout();
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        version: 'asier_dashboard_export_v1',
+        layout: sessions.map(s => ({ id: s.id, date: s.date })),
+        customSessions: sessions.filter(s => s.custom === true),
+        deletedSessions: loadDeletedSessions(),
+        sessionData: sessionData,
+        weeklyReviews: collectWeeklyReviews()
+      };
+
+      const json = JSON.stringify(payload, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const stamp = new Date().toISOString().slice(0,10);
+      a.href = url;
+      a.download = `planificacion-asier-backup-${stamp}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      navigator.clipboard?.writeText(json).catch(()=>{});
+      alert('Datos exportados. También se han copiado al portapapeles si el navegador lo permite.');
+    }
+
+    function openImportModal(){
+      document.getElementById('importText').value = '';
+      document.getElementById('importModal').classList.add('open');
+    }
+
+    function closeImportModal(){
+      document.getElementById('importModal').classList.remove('open');
+    }
+
+    function importData(){
+      const raw = document.getElementById('importText').value.trim();
+      if(!raw){ alert('Pega primero los datos exportados.'); return; }
+
+      try {
+        const payload = JSON.parse(raw);
+        if(!payload || payload.version !== 'asier_dashboard_export_v1'){
+          throw new Error('Formato no válido');
+        }
+
+        if(!confirm('¿Importar estos datos? Se actualizarán los cambios guardados en este dispositivo.')){
+          return;
+        }
+
+        if(Array.isArray(payload.deletedSessions)){
+          localStorage.setItem(DELETED_SESSIONS_KEY, JSON.stringify(payload.deletedSessions));
+        }
+
+        if(Array.isArray(payload.customSessions)){
+          localStorage.setItem(CUSTOM_SESSIONS_KEY, JSON.stringify(payload.customSessions));
+          sessions = buildInitialSessions().filter(s => !loadDeletedSessions().includes(s.id)).concat(payload.customSessions);
+        }
+
+        if(Array.isArray(payload.layout)){
+          const dateById = Object.fromEntries(payload.layout.map(item => [item.id, item.date]));
+          sessions = sessions.map(s => dateById[s.id] ? { ...s, date: dateById[s.id] } : s);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions.map(s => ({id:s.id, date:s.date}))));
+        }
+
+        if(payload.sessionData && typeof payload.sessionData === 'object'){
+          sessionData = payload.sessionData;
+          localStorage.setItem(SESSION_DATA_KEY, JSON.stringify(sessionData));
+        }
+
+        if(payload.weeklyReviews && typeof payload.weeklyReviews === 'object'){
+          Object.entries(payload.weeklyReviews).forEach(([key, value]) => {
+            if(key.startsWith('weekly_review_')) localStorage.setItem(key, value);
+          });
+        }
+
+        closeImportModal();
+        closeModal();
+        renderCalendar();
+        alert('Datos importados correctamente.');
+      } catch(e) {
+        alert('No se han podido importar los datos. Revisa que hayas pegado el JSON completo exportado.');
+      }
+    }
+
+    function closeModal(){ document.getElementById('modal').classList.remove('open'); currentSessionId = null; }
+    function saveLayout(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions.map(s => ({id:s.id, date:s.date})))); }
+    function resetLayout(){ if(confirm('¿Restaurar la planificación original? Se mantendrán registros guardados y sesiones personales. También se recuperarán sesiones borradas del plan original.')){ localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(DELETED_SESSIONS_KEY); sessions = buildInitialSessions().concat(loadCustomSessions()); renderCalendar(); } }
+    function goToday(){
+      const now = new Date();
+      const monthId = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+      document.getElementById('monthSelect').value = months.some(m => m.id === monthId) ? monthId : '2026-05';
+      renderCalendar();
+    }
+
+    function updateMonthStats(monthId){
+      const arr = sessions.filter(s => s.date.startsWith(monthId));
+      (document.getElementById('mSessions')||{}).textContent = arr.length;
+      (document.getElementById('mDone')||{}).textContent = arr.filter(s => (sessionData[s.id]?.status || s.status) === 'Completado').length;
+      (document.getElementById('mRun')||{}).textContent = arr.filter(s => s.type === 'running').length;
+      (document.getElementById('mHyrox')||{}).textContent = arr.filter(s => s.type === 'hyrox').length;
+      (document.getElementById('mStrength')||{}).textContent = arr.filter(s => s.type === 'strength').length;
+
+      const completed = arr.filter(s => (sessionData[s.id]?.status || s.status) === 'Completado').length;
+      const logs = arr.map(s => sessionData[s.id]?.log).filter(Boolean);
+      const km = logs.reduce((sum,l)=> sum + (parseFloat(String(l.distance||'').replace(',','.')) || 0), 0);
+      const rpes = logs.map(l => parseFloat(l.rpe)).filter(n => !isNaN(n));
+      const pains = logs.map(l => parseFloat(l.pain)).filter(n => !isNaN(n));
+      const avgRpe = rpes.length ? (rpes.reduce((a,b)=>a+b,0)/rpes.length).toFixed(1) : '-';
+      const maxPain = pains.length ? Math.max(...pains) : '-';
+
+      (document.getElementById('heroCompleted')||{}).textContent = completed + '/' + arr.length;
+      (document.getElementById('heroKm')||{}).textContent = km ? km.toFixed(1) : '0';
+      (document.getElementById('heroRpe')||{}).textContent = avgRpe;
+      (document.getElementById('heroPain')||{}).textContent = maxPain;
+      renderTypeChart(arr);
+      renderTrendChart(arr);
+      updateTodayCommand();
+      updateWeekVisuals();
+      updateHistoryAndAlerts();
+    }
+
+    function renderTypeChart(arr){
+      const chart = document.getElementById('typeChart');
+      if(!chart) return;
+      const types = [
+        ['running','RUN'],
+        ['hyrox','HYR'],
+        ['strength','STR'],
+        ['optional','REC'],
+        ['race','RACE']
+      ];
+      const max = Math.max(1, ...types.map(([t]) => arr.filter(s => s.type === t).length));
+      const total = arr.length;
+      (document.getElementById('chartTotal')||{}).textContent = total;
+      chart.innerHTML = types.map(([type,label]) => {
+        const count = arr.filter(s => s.type === type).length;
+        const h = Math.max(8, (count / max) * 100);
+        return `<div class="bar-wrap"><div class="bar" style="height:${h}px"></div><span>${label}</span><strong>${count}</strong></div>`;
+      }).join('');
+    }
+
+
+    function getCurrentMonthSessions(){
+      const monthId = document.getElementById('monthSelect').value;
+      return sessions.filter(s => s.date.startsWith(monthId));
+    }
+
+    function getLog(s){
+      return sessionData[s.id]?.log || {};
+    }
+
+    function parseKm(value){
+      return parseFloat(String(value || '').replace(',', '.').replace('km','').trim()) || 0;
+    }
+
+    function parseMinutes(value){
+      const raw = String(value || '').trim();
+      if(!raw) return 0;
+      if(raw.includes(':')){
+        const parts = raw.split(':').map(Number);
+        if(parts.length === 2) return parts[0] + parts[1] / 60;
+        if(parts.length === 3) return parts[0] * 60 + parts[1] + parts[2] / 60;
+      }
+      return parseFloat(raw.replace(',', '.')) || 0;
+    }
+
+    function getWeekRange(date=new Date()){
+      const d = new Date(date);
+      const day = (d.getDay() + 6) % 7;
+      const monday = new Date(d);
+      monday.setDate(d.getDate() - day);
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      return {monday: toISO(monday), sunday: toISO(sunday)};
+    }
+
+    function sessionsInRange(startIso, endIso){
+      return sessions.filter(s => s.date >= startIso && s.date <= endIso);
+    }
+
+    function updateTodayCommand(){
+      const todayIso = toISO(new Date());
+      let todays = sessions.filter(s => s.date === todayIso);
+      if(!todays.length){
+        const future = sessions.filter(s => s.date >= todayIso).sort((a,b)=>a.date.localeCompare(b.date))[0];
+        todays = future ? [future] : [];
+      }
+
+      const title = document.getElementById('todayTitle');
+      const advice = document.getElementById('todayAdvice');
+      const status = document.getElementById('todayStatus');
+      if(!title || !advice || !status) return;
+
+      const recentLogs = sessions
+        .map(s => ({s, log:getLog(s)}))
+        .filter(x => x.log && (x.log.rpe || x.log.pain))
+        .slice(-6);
+
+      const maxPain = Math.max(0, ...recentLogs.map(x => parseFloat(x.log.pain)).filter(n=>!isNaN(n)));
+      const avgRpeVals = recentLogs.map(x => parseFloat(x.log.rpe)).filter(n=>!isNaN(n));
+      const avgRpe = avgRpeVals.length ? avgRpeVals.reduce((a,b)=>a+b,0)/avgRpeVals.length : 0;
+
+      let state = 'green', label = 'OK', reason = 'Ejecuta el plan previsto.';
+      if(maxPain >= 5){
+        state = 'red'; label = 'Riesgo'; reason = 'Dolor alto registrado. Prioriza recovery, bici suave o reduce impacto.';
+      } else if(avgRpe >= 8){
+        state = 'yellow'; label = 'Cuidado'; reason = 'Carga percibida alta. Reduce volumen un 15–25% si notas fatiga.';
+      } else if(avgRpe >= 7){
+        state = 'yellow'; label = 'Control'; reason = 'Semana exigente. Mantén intensidad, pero cuida recuperación.';
+      }
+
+      const sessionText = todays.length ? `${todays[0].title} · ${formatDate(todays[0].date)}` : 'Sin sesiones próximas';
+      title.textContent = `Qué hago hoy: ${sessionText}`;
+      advice.textContent = reason;
+      status.textContent = label;
+      status.className = 'today-status ' + state;
+    }
+
+    function updateWeekVisuals(){
+      const range = getWeekRange();
+      const arr = sessionsInRange(range.monday, range.sunday);
+      const logs = arr.map(getLog).filter(Boolean);
+      const completed = arr.filter(s => (sessionData[s.id]?.status || s.status) === 'Completado').length;
+      const km = logs.reduce((sum,l)=>sum + parseKm(l.distance),0);
+      const load = logs.reduce((sum,l)=>sum + (parseMinutes(l.time) * (parseFloat(l.rpe)||0)),0);
+      const pains = logs.map(l=>parseFloat(l.pain)).filter(n=>!isNaN(n));
+      const maxPain = pains.length ? Math.max(...pains) : 0;
+
+      const types = arr.reduce((acc,s)=>{acc[s.type]=(acc[s.type]||0)+1; return acc;},{});
+      const focus = Object.entries(types).sort((a,b)=>b[1]-a[1])[0]?.[0];
+
+      if(!document.getElementById('weekSessions')) return;
+      document.getElementById('weekSessions').textContent = `${completed}/${arr.length} sesiones`;
+      document.getElementById('weekFocus').textContent = focus ? `Foco: ${labelType(focus)}` : 'Sin sesiones esta semana';
+      document.getElementById('weekKm').textContent = `${km.toFixed(1)} km`;
+      document.getElementById('weekLoad').textContent = load ? Math.round(load) : '—';
+      document.getElementById('weekLoadNote').textContent = load ? 'Carga interna estimada' : 'Añade tiempo + RPE';
+
+      let risk = 'Bajo', note = 'Sin señales de riesgo';
+      if(maxPain >= 5){ risk = 'Alto'; note = 'Dolor máximo elevado'; }
+      else if(load > 2500){ risk = 'Medio'; note = 'Carga alta'; }
+      else if(load > 0){ risk = 'Controlado'; note = 'Carga registrada'; }
+      document.getElementById('weekRisk').textContent = risk;
+      document.getElementById('weekRiskNote').textContent = note;
+    }
+
+    function updateHistoryAndAlerts(){
+      const history = document.getElementById('historyList');
+      const alerts = document.getElementById('alertsList');
+      if(!history || !alerts) return;
+
+      const logged = sessions
+        .map(s => ({...s, data: sessionData[s.id], log: getLog(s)}))
+        .filter(s => s.data && (s.data.status === 'Completado' || s.log.time || s.log.distance || s.log.rpe || s.log.pain))
+        .sort((a,b)=>b.date.localeCompare(a.date))
+        .slice(0,4);
+
+      history.innerHTML = logged.length ? logged.map(s => `
+        <div class="history-item">
+          <strong>${escapeHtml(s.title)}</strong>
+          <span>${formatDate(s.date)} · ${labelType(s.type)} · ${s.log.distance || '-'} · RPE ${s.log.rpe || '-'}</span>
+        </div>
+      `).join('') : `<div class="history-item"><strong>Sin histórico todavía</strong><span>Cuando completes entrenos, aparecerán aquí tus últimos registros.</span></div>`;
+
+      const allLogs = sessions.map(s => ({s, log:getLog(s)})).filter(x => x.log);
+      const alertItems = [];
+      const painHigh = allLogs.filter(x => parseFloat(x.log.pain) >= 5);
+      const rpeHigh = allLogs.filter(x => parseFloat(x.log.rpe) >= 8);
+
+      if(painHigh.length) alertItems.push(['red','Dolor elevado',`Hay ${painHigh.length} registro(s) con dolor ≥5. Revisa impacto y series.`]);
+      if(rpeHigh.length >= 2) alertItems.push(['yellow','Carga percibida alta',`Hay ${rpeHigh.length} entreno(s) con RPE ≥8. Controla volumen.`]);
+
+      const range = getWeekRange();
+      const weekArr = sessionsInRange(range.monday, range.sunday);
+      const hard = weekArr.filter(s => ['hyrox','running','race'].includes(s.type)).length;
+      if(hard >= 4) alertItems.push(['yellow','Semana exigente',`Tienes ${hard} sesiones de impacto/específicas esta semana.`]);
+
+      if(!alertItems.length) alertItems.push(['green','Todo estable','No hay alertas relevantes con los datos actuales.']);
+
+      alerts.innerHTML = alertItems.map(([cls,title,text]) => `
+        <div class="alert-item ${cls}">
+          <strong>${title}</strong>
+          <span>${text}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderTrendChart(arr){
+      const chart = document.getElementById('trendChart');
+      if(!chart) return;
+
+      const byWeek = {};
+      arr.forEach(s => {
+        const d = new Date(s.date + 'T00:00:00');
+        const range = getWeekRange(d);
+        const key = range.monday.slice(5);
+        const log = getLog(s);
+        byWeek[key] = byWeek[key] || {km:0, rpeVals:[], painVals:[]};
+        byWeek[key].km += parseKm(log.distance);
+        const r = parseFloat(log.rpe); if(!isNaN(r)) byWeek[key].rpeVals.push(r);
+        const p = parseFloat(log.pain); if(!isNaN(p)) byWeek[key].painVals.push(p);
+      });
+
+      const entries = Object.entries(byWeek);
+      if(!entries.length){
+        chart.innerHTML = `<div class="history-item"><strong>Sin datos</strong><span>Completa sesiones para ver tendencias.</span></div>`;
+        return;
+      }
+
+      const maxKm = Math.max(1, ...entries.map(([_,v])=>v.km));
+      chart.innerHTML = entries.map(([week,v]) => {
+        const avgRpe = v.rpeVals.length ? v.rpeVals.reduce((a,b)=>a+b,0)/v.rpeVals.length : 0;
+        const maxPain = v.painVals.length ? Math.max(...v.painVals) : 0;
+        return `<div class="trend-col">
+          <div class="trend-bars">
+            <div class="trend-bar km" style="height:${Math.max(4,(v.km/maxKm)*92)}px" title="km ${v.km.toFixed(1)}"></div>
+            <div class="trend-bar rpe" style="height:${Math.max(4,(avgRpe/10)*92)}px" title="RPE ${avgRpe.toFixed(1)}"></div>
+            <div class="trend-bar pain" style="height:${Math.max(4,(maxPain/10)*92)}px" title="Dolor ${maxPain}"></div>
+          </div>
+          <span>${week}</span>
+        </div>`;
+      }).join('');
+    }
+
+
+    function getSession(id){ return sessions.find(s => s.id === id); }
+    function mergedSession(s,d){ return {...s, ...d, status: d.status || s.status || 'Pendiente'}; }
+    function labelType(type){ return ({running:'Running', hyrox:'Hyrox', strength:'Fuerza', optional:'Recovery', recovery:'Recovery', race:'Competición'}[type] || type); }
+    function toISO(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+    function isSameDay(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+    function shortMonth(d){ return ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][d.getMonth()]; }
+    function formatDate(iso){ const d = new Date(iso+'T00:00:00'); return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; }
+    function escapeHtml(str=''){ return String(str).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+    function escapeAttr(str=''){ return escapeHtml(str).replace(/`/g,'&#96;'); }
+
+    document.addEventListener('input', (e) => {
+      if(e.target && ['logPain','logFeel','logNotes'].includes(e.target.id)) updateSessionReading();
+      if(e.target && e.target.dataset && e.target.dataset.logKey) updateSessionReading();
+    });
+
+    init();
+  </script>
+</body>
+</html>
